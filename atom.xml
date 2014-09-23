@@ -4,7 +4,7 @@
   <title><![CDATA[The Swappage Playground]]></title>
   <link href="http://swappage.github.io/atom.xml" rel="self"/>
   <link href="http://swappage.github.io/"/>
-  <updated>2014-09-23T21:52:18+02:00</updated>
+  <updated>2014-09-23T22:08:50+02:00</updated>
   <id>http://swappage.github.io/</id>
   <author>
     <name><![CDATA[Swappage]]></name>
@@ -22,7 +22,7 @@
 
 <p>It looks like i made up my mind and started a blog!.</p>
 
-<p>*lier*</p>
+<p><em>*lier*</em></p>
 
 <p>Ok ok, you are right&hellip; the truth is that i started playing around with Markdown and octopress, and i wanted to try publishing something :)</p>
 
