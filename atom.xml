@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[The Swappage Playground]]></title>
+  <link href="http://swappage.github.io/atom.xml" rel="self"/>
+  <link href="http://swappage.github.io/"/>
+  <updated>2014-09-23T21:52:18+02:00</updated>
+  <id>http://swappage.github.io/</id>
+  <author>
+    <name><![CDATA[Swappage]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Hello World]]></title>
+    <link href="http://swappage.github.io/blog/2014/09/23/hello-world/"/>
+    <updated>2014-09-23T21:20:47+02:00</updated>
+    <id>http://swappage.github.io/blog/2014/09/23/hello-world</id>
+    <content type="html"><![CDATA[<p>Hello there!</p>
+
+<p>It looks like i made up my mind and started a blog!.</p>
+
+<p>*lier*</p>
+
+<p>Ok ok, you are right&hellip; the truth is that i started playing around with Markdown and octopress, and i wanted to try publishing something :)</p>
+
+<p>What&rsquo;s going to be published here?</p>
+
+<p>Well, pretty much everything that comes in my mind, things that i found interesting, reserches that I might be working on, games i play..</p>
+
+<p>Oh right, I recently got an addiction for hacking games and competitions, so you will probably see some walkthroughs of challenges and problems from various CTF games..</p>
+
+<p>mhh yep, pretty much it for now.
+See you soon :)</p>
+]]></content>
+  </entry>
+  
+</feed>
