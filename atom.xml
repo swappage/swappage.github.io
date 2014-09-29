@@ -4,7 +4,7 @@
   <title><![CDATA[The Swappage Playground]]></title>
   <link href="http://swappage.github.io/atom.xml" rel="self"/>
   <link href="http://swappage.github.io/"/>
-  <updated>2014-09-28T17:09:33+02:00</updated>
+  <updated>2014-09-29T10:22:18+02:00</updated>
   <id>http://swappage.github.io/</id>
   <author>
     <name><![CDATA[Swappage]]></name>
@@ -105,7 +105,7 @@ It was a matter of no time that I could spot a comment to a blog post boasting a
 <pre><code>192.168.127.140 - - [16/Sep/2014:20:42:54 +0000] "GET /wp-content/uploads/wysija/themes/weblizer/template.php HTTP/1.1" 200 165 "-" "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)
 </code></pre>
 
-<p>Let&rsquo;s give a look at this file, it&rsquo;s most likely gonna be malicious, and infact</p>
+<p>Let&rsquo;s give a look at this file, it&rsquo;s most likely gonna be malicious, and in fact</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -442,7 +442,7 @@ Version 0:
         /EmbeddedFile: [8]
 </code></pre>
 
-<p>Wow, so many objects,  it was really worth looking at it one by one more closely, because infact in the 8th one we could spot:</p>
+<p>Wow, so many objects,  it was really worth looking at it one by one more closely, because in fact in the 8th one we could spot:</p>
 
 <pre><code>PPDF&gt; object 8
 
