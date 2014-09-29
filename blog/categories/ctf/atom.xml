@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ctf | The Swappage Playground]]></title>
   <link href="http://swappage.github.io/blog/categories/ctf/atom.xml" rel="self"/>
   <link href="http://swappage.github.io/"/>
-  <updated>2014-09-29T10:22:18+02:00</updated>
+  <updated>2014-09-29T17:45:32+02:00</updated>
   <id>http://swappage.github.io/</id>
   <author>
     <name><![CDATA[Swappage]]></name>
@@ -269,7 +269,7 @@ Sep 17 19:20:55 ubuntu sudo:   ubuntu : TTY=pts/0 ; PWD=/home/ubuntu/CSAW2014-Wo
 
 <p>and at a first look it looked just like an image of a wizard with text on it.</p>
 
-<p>But it for sure was hiding something, the usage of PDF with attached malicious content is very common in waterfall attacks, so why not giving it a closer look with PDF analysis tools like peepdf?</p>
+<p>But it for sure was hiding something, the usage of PDF with attached malicious content is very common in waterhole attacks, so why not giving it a closer look with PDF analysis tools like peepdf?</p>
 
 <pre><code># peepdf -i announcement.pdf 
 Warning: Spidermonkey is not installed!!
