@@ -4,7 +4,7 @@
   <title><![CDATA[The Swappage Playground]]></title>
   <link href="http://swappage.github.io/atom.xml" rel="self"/>
   <link href="http://swappage.github.io/"/>
-  <updated>2014-09-29T17:45:32+02:00</updated>
+  <updated>2014-10-07T00:07:26+02:00</updated>
   <id>http://swappage.github.io/</id>
   <author>
     <name><![CDATA[Swappage]]></name>
@@ -12,6 +12,34 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Vulnhub Competition: Persistence]]></title>
+    <link href="http://swappage.github.io/blog/2014/10/06/vulnhub-competition-persistence/"/>
+    <updated>2014-10-06T23:35:09+02:00</updated>
+    <id>http://swappage.github.io/blog/2014/10/06/vulnhub-competition-persistence</id>
+    <content type="html"><![CDATA[<p>Only a couple of hours have past since Persistence <a href="http://www.vulnhub.com/">VulnHub</a> competition ended.</p>
+
+<p>Of course, again, as a VulnHub addict as i am, i couldn&rsquo;t refrain my urge to partecipate and feel the pain :)</p>
+
+<p>I really enjoyed playing this vulnerable VM, and the reward for such an high amount of frustration was a lot and lot of fun.</p>
+
+<p>Many people partecipated this time, way more then the ones who took part in the Hades challenge, and this is a demonstration that VulnHub is getting more and more popular every day.</p>
+
+<!-- more -->
+
+
+<p>Now that the competition is over, i feel like i want to share my submission with everyone, by linking the PDF directly here&hellip; yes, i know, i&rsquo;m lazy, but i don&rsquo;t feel like copying and pasting it into a blog post, considering the result would be pretty much the same :).</p>
+
+<p>And yes yes, i also know that my english is terrible, but i think that it is, at a bare minimum, at least understandable.</p>
+
+<p>I intend to use this post also to thank <a href="http://blog.techorganic.com/">Superkojiman</a>, sagi- for the effort and time spent in putting togeder this funny VM, and of course <a href="http://www.vulnhub.com/">VulnHub</a> staff that every day put a lot of energy in keeping the great project going for the good of the community, by providing an awesome playground for having fun and learning stuff free of charge :)</p>
+
+<p>For those who are still interested in reading it, here is my writeup (in PDF format): <a href="http://swappage.github.io/images/2014-10-06/persistence.pdf">Persistence</a></p>
+
+<p>Oh, and i almost forgot, <a href="http://download.vulnhub.com/media/persistence/">here</a> you can find other writeups from other people who made a submissions, for your reading pleasure.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[CSAW 2014: Fluffy No More]]></title>
