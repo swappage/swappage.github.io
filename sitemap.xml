@@ -3,6 +3,14 @@
   
   
   <url>
+    <loc>http://swappage.github.io/blog/2014/10/23/asis-ctf-finals-2014-important-day/</loc>
+    
+    <lastmod>2014-10-23T20:32:08+02:00</lastmod>
+    
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
     <loc>http://swappage.github.io/blog/2014/10/09/su-ctf-2014-personalized-captcha/</loc>
     
     <lastmod>2014-10-09T22:09:39+02:00</lastmod>
@@ -45,21 +53,21 @@
   
   <url>
     <loc>http://swappage.github.io/blog/archives/</loc>
-    <lastmod>2014-10-16T02:40:52+02:00</lastmod>
+    <lastmod>2014-10-23T20:44:06+02:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
     <loc>http://swappage.github.io/</loc>
-    <lastmod>2014-10-16T02:40:52+02:00</lastmod>
+    <lastmod>2014-10-23T20:44:06+02:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
   <url>
     <loc>http://swappage.github.io/about/</loc>
-    <lastmod>2014-10-16T02:40:52+02:00</lastmod>
+    <lastmod>2014-10-23T20:44:06+02:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

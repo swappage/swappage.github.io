@@ -1,0 +1,291 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>ASIS-CTF Finals 2014: Important Day - The Swappage Playground</title>
+  <meta name="author" content="Swappage">
+
+  
+  <meta name="description" content="Important Day was a 100 points challenge where you were provided with a pcap file, and asked to determine when the system was powered on. By looking &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://swappage.github.io/blog/2014/10/23/asis-ctf-finals-2014-important-day">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="The Swappage Playground" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">The Swappage Playground</a></h1>
+  
+    <h2>Because in the end, what does matter is having fun.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:swappage.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">ASIS-CTF Finals 2014: Important Day</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-10-23T20:32:08+02:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2014</span></span> <span class='time'>8:32 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Important Day was a 100 points challenge where you were provided with a pcap file, and asked to determine when the system was powered on.</p>
+
+<p>By looking at the pcap file it really looked like a portscan, and by a quick google search i ran into a post from back in 2006 on seclists.org discussing about the possibility to guess the time of the last system reboot, by looking at the TCP protocol TSVAL option.</p>
+
+<!-- more -->
+
+
+<p><img class="center" src="/images/2014-10-23/scan.png"></p>
+
+<p>Bsically since the TSVAL counter is reset to zero every time the system reboots (at least on many OSes), if you know the frequency at which TSVAL is increased, you can try to guess the boot timestamp.</p>
+
+<p>As the challenge was providing a pcap, we had the capture timestamp, so if we had enaugh TSVAL options to compare, we could try to guess the system uptime.</p>
+
+<p>The tickrate at which TSVAL increases is different from Operating System to Operating System, and with only the pcap i didn&rsquo;t know the  target OS, but i had multiple packets to analyze, so it was probably a matter of math.</p>
+
+<p>I decided to set the following filter</p>
+
+<pre><code>tcp.options.timestamp.tsval &amp;&amp; ip.src == 192.168.100.78
+</code></pre>
+
+<p>so that i could get only the packets having the tsval option field set, and coming from the target system (not the stanning one)</p>
+
+<p><img class="center" src="/images/2014-10-23/filtered.png"></p>
+
+<p>And then analyzed how the TSVAL increased compared to the milliseconds in the packet capture timestamp.</p>
+
+<p>By picking packets number number 4034 and 4039 we can notice:</p>
+
+<pre><code>4034: Timestamp in ms: 1412157739276    TSVAL: 2400803286
+4039: Timestamp in ms: 1412157739438    TSVAL: 2400803327
+</code></pre>
+
+<p>So with some simple math</p>
+
+<pre><code>1412157739438 - 1412157739276 = 162
+2400803327 - 2400803286 = 41
+</code></pre>
+
+<p>we can figure out that TSVAL increases by 1 tick every ~4ms</p>
+
+<p>Ok, awesome
+So now if our assumption was correct, we need to figure out what was the timestamp when TSVAL was 0:</p>
+
+<p>so with some other simple math we discover</p>
+
+<pre><code>(1412157739438 - 2400803327 * 4) / 1000= 1402554526.130
+</code></pre>
+
+<p>This timestamp corresponds to Thu, 12 Jun 2014 06:28:46 GMT</p>
+
+<p>The flag was in the format of md5(ASIS_date) where date was in the format &ldquo;%Y:%m:%d:%H:%M&rdquo;</p>
+
+<p>A quick conversion did the trick</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="mi">1402554526</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&quot;%Y:%m:</span><span class="si">%d</span><span class="s">:%H:%M&quot;</span><span class="p">))</span>
+</span><span class='line'><span class="mi">2014</span><span class="p">:</span><span class="mo">06</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">58</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And at this point you&rsquo;d say: <strong>&ldquo;Wait, what&rsquo;s this?, why 10:58?&rdquo;</strong></p>
+
+<p>And that&rsquo;s the good point, and the fact that really disappointed me, as i spent <em>a lot of time</em> with trial and error thinking i was doing things wrong, when at  a certain point, with all the frustration i had accumulated, i went on the CTF IRC channel asking an admin if something was broken, and then he pointed out that i was supposed to provide the date in IRST timezone.</p>
+
+<p>I mean, WHAT? are you kidding me? timestamps in forensics not in UTC? come on, please, guess what would happen if you were to ask logs to an ISP for a specific IP address at a certain timestamp not in UTC.. you might send an innocent on trial because of that.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Swappage</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2014-10-23T20:32:08+02:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2014</span></span> <span class='time'>8:32 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ctf/'>ctf</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://swappage.github.io/blog/2014/10/23/asis-ctf-finals-2014-important-day/" data-via="" data-counturl="http://swappage.github.io/blog/2014/10/23/asis-ctf-finals-2014-important-day/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/10/09/su-ctf-2014-personalized-captcha/" title="Previous Post: SU-CTF 2014: Personalized Captcha">&laquo; SU-CTF 2014: Personalized Captcha</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/10/23/asis-ctf-finals-2014-important-day/">ASIS-CTF Finals 2014: Important Day</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/09/su-ctf-2014-personalized-captcha/">SU-CTF 2014: Personalized Captcha</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/06/vulnhub-competition-persistence/">Vulnhub Competition: Persistence</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/28/csaw-2014-fluffy-no-more/">CSAW 2014: Fluffy No More</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/24/csaw-2014-saturn-walkthrough/">CSAW 2014: Saturn Walkthrough</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Swappage -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'swappage';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://swappage.github.io/blog/2014/10/23/asis-ctf-finals-2014-important-day/';
+        var disqus_url = 'http://swappage.github.io/blog/2014/10/23/asis-ctf-finals-2014-important-day/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

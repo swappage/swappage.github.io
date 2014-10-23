@@ -4,7 +4,7 @@
   <title><![CDATA[The Swappage Playground]]></title>
   <link href="http://swappage.github.io/atom.xml" rel="self"/>
   <link href="http://swappage.github.io/"/>
-  <updated>2014-10-16T02:40:52+02:00</updated>
+  <updated>2014-10-23T20:44:06+02:00</updated>
   <id>http://swappage.github.io/</id>
   <author>
     <name><![CDATA[Swappage]]></name>
@@ -12,6 +12,80 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ASIS-CTF Finals 2014: Important Day]]></title>
+    <link href="http://swappage.github.io/blog/2014/10/23/asis-ctf-finals-2014-important-day/"/>
+    <updated>2014-10-23T20:32:08+02:00</updated>
+    <id>http://swappage.github.io/blog/2014/10/23/asis-ctf-finals-2014-important-day</id>
+    <content type="html"><![CDATA[<p>Important Day was a 100 points challenge where you were provided with a pcap file, and asked to determine when the system was powered on.</p>
+
+<p>By looking at the pcap file it really looked like a portscan, and by a quick google search i ran into a post from back in 2006 on seclists.org discussing about the possibility to guess the time of the last system reboot, by looking at the TCP protocol TSVAL option.</p>
+
+<!-- more -->
+
+
+<p><img class="center" src="http://swappage.github.io/images/2014-10-23/scan.png"></p>
+
+<p>Bsically since the TSVAL counter is reset to zero every time the system reboots (at least on many OSes), if you know the frequency at which TSVAL is increased, you can try to guess the boot timestamp.</p>
+
+<p>As the challenge was providing a pcap, we had the capture timestamp, so if we had enaugh TSVAL options to compare, we could try to guess the system uptime.</p>
+
+<p>The tickrate at which TSVAL increases is different from Operating System to Operating System, and with only the pcap i didn&rsquo;t know the  target OS, but i had multiple packets to analyze, so it was probably a matter of math.</p>
+
+<p>I decided to set the following filter</p>
+
+<pre><code>tcp.options.timestamp.tsval &amp;&amp; ip.src == 192.168.100.78
+</code></pre>
+
+<p>so that i could get only the packets having the tsval option field set, and coming from the target system (not the stanning one)</p>
+
+<p><img class="center" src="http://swappage.github.io/images/2014-10-23/filtered.png"></p>
+
+<p>And then analyzed how the TSVAL increased compared to the milliseconds in the packet capture timestamp.</p>
+
+<p>By picking packets number number 4034 and 4039 we can notice:</p>
+
+<pre><code>4034: Timestamp in ms: 1412157739276    TSVAL: 2400803286
+4039: Timestamp in ms: 1412157739438    TSVAL: 2400803327
+</code></pre>
+
+<p>So with some simple math</p>
+
+<pre><code>1412157739438 - 1412157739276 = 162
+2400803327 - 2400803286 = 41
+</code></pre>
+
+<p>we can figure out that TSVAL increases by 1 tick every ~4ms</p>
+
+<p>Ok, awesome
+So now if our assumption was correct, we need to figure out what was the timestamp when TSVAL was 0:</p>
+
+<p>so with some other simple math we discover</p>
+
+<pre><code>(1412157739438 - 2400803327 * 4) / 1000= 1402554526.130
+</code></pre>
+
+<p>This timestamp corresponds to Thu, 12 Jun 2014 06:28:46 GMT</p>
+
+<p>The flag was in the format of md5(ASIS_date) where date was in the format &ldquo;%Y:%m:%d:%H:%M&rdquo;</p>
+
+<p>A quick conversion did the trick</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="mi">1402554526</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&quot;%Y:%m:</span><span class="si">%d</span><span class="s">:%H:%M&quot;</span><span class="p">))</span>
+</span><span class='line'><span class="mi">2014</span><span class="p">:</span><span class="mo">06</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">58</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And at this point you&rsquo;d say: <strong>&ldquo;Wait, what&rsquo;s this?, why 10:58?&rdquo;</strong></p>
+
+<p>And that&rsquo;s the good point, and the fact that really disappointed me, as i spent <em>a lot of time</em> with trial and error thinking i was doing things wrong, when at  a certain point, with all the frustration i had accumulated, i went on the CTF IRC channel asking an admin if something was broken, and then he pointed out that i was supposed to provide the date in IRST timezone.</p>
+
+<p>I mean, WHAT? are you kidding me? timestamps in forensics not in UTC? come on, please, guess what would happen if you were to ask logs to an ISP for a specific IP address at a certain timestamp not in UTC.. you might send an innocent on trial because of that.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[SU-CTF 2014: Personalized Captcha]]></title>
