@@ -87,18 +87,16 @@
 
 <div class="entry-content"><p>Important Day was a 100 points challenge where you were provided with a pcap file, and asked to determine when the system was powered on.</p>
 
-<p>By looking at the pcap file it really looked like a portscan, and by a quick google search i ran into a post from back in 2006 on seclists.org discussing about the possibility to guess the time of the last system reboot, by looking at the TCP protocol TSVAL option.</p>
+<p>By looking at the pcap file it really looked like a portscan, and by a quick google search i ran into a post from back in 2006 on seclists.org discussing about the possibility to guess the time of the last system reboot, by looking at the TCP protocol TSVAL option.
+<!-- more --></p>
 
-<!-- more -->
-
-
-<p><img class="center" src="/images/2014-10-23/scan.png"></p>
+<p><img class="center" src="/images/2014-10-23/scan.png" /></p>
 
 <p>Bsically since the TSVAL counter is reset to zero every time the system reboots (at least on many OSes), if you know the frequency at which TSVAL is increased, you can try to guess the boot timestamp.</p>
 
 <p>As the challenge was providing a pcap, we had the capture timestamp, so if we had enaugh TSVAL options to compare, we could try to guess the system uptime.</p>
 
-<p>The tickrate at which TSVAL increases is different from Operating System to Operating System, and with only the pcap i didn&rsquo;t know the  target OS, but i had multiple packets to analyze, so it was probably a matter of math.</p>
+<p>The tickrate at which TSVAL increases is different from Operating System to Operating System, and with only the pcap i didn’t know the  target OS, but i had multiple packets to analyze, so it was probably a matter of math.</p>
 
 <p>I decided to set the following filter</p>
 
@@ -107,14 +105,14 @@
 
 <p>so that i could get only the packets having the tsval option field set, and coming from the target system (not the stanning one)</p>
 
-<p><img class="center" src="/images/2014-10-23/filtered.png"></p>
+<p><img class="center" src="/images/2014-10-23/filtered.png" /></p>
 
 <p>And then analyzed how the TSVAL increased compared to the milliseconds in the packet capture timestamp.</p>
 
 <p>By picking packets number number 4034 and 4039 we can notice:</p>
 
-<pre><code>4034: Timestamp in ms: 1412157739276    TSVAL: 2400803286
-4039: Timestamp in ms: 1412157739438    TSVAL: 2400803327
+<pre><code>4034: Timestamp in ms: 1412157739276	TSVAL: 2400803286
+4039: Timestamp in ms: 1412157739438	TSVAL: 2400803327
 </code></pre>
 
 <p>So with some simple math</p>
@@ -135,22 +133,22 @@ So now if our assumption was correct, we need to figure out what was the timesta
 
 <p>This timestamp corresponds to Thu, 12 Jun 2014 06:28:46 GMT</p>
 
-<p>The flag was in the format of md5(ASIS_date) where date was in the format &ldquo;%Y:%m:%d:%H:%M&rdquo;</p>
+<p>The flag was in the format of md5(ASIS_date) where date was in the format “%Y:%m:%d:%H:%M”</p>
 
 <p>A quick conversion did the trick</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="mi">1402554526</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&quot;%Y:%m:</span><span class="si">%d</span><span class="s">:%H:%M&quot;</span><span class="p">))</span>
-</span><span class='line'><span class="mi">2014</span><span class="p">:</span><span class="mo">06</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">58</span>
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="mi">1402554526</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&quot;%Y:%m:</span><span class="si">%d</span><span class="s">:%H:%M&quot;</span><span class="p">))</span>
+</span><span class="line"><span class="mi">2014</span><span class="p">:</span><span class="mo">06</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">58</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
+<p>And at this point you’d say: <strong>“Wait, what’s this?, why 10:58?”</strong></p>
 
-<p>And at this point you&rsquo;d say: <strong>&ldquo;Wait, what&rsquo;s this?, why 10:58?&rdquo;</strong></p>
-
-<p>And that&rsquo;s the good point, and the fact that really disappointed me, as i spent <em>a lot of time</em> with trial and error thinking i was doing things wrong, when at  a certain point, with all the frustration i had accumulated, i went on the CTF IRC channel asking an admin if something was broken, and then he pointed out that i was supposed to provide the date in IRST timezone.</p>
+<p>And that’s the good point, and the fact that really disappointed me, as i spent <em>a lot of time</em> with trial and error thinking i was doing things wrong, when at  a certain point, with all the frustration i had accumulated, i went on the CTF IRC channel asking an admin if something was broken, and then he pointed out that i was supposed to provide the date in IRST timezone.</p>
 
 <p>I mean, WHAT? are you kidding me? timestamps in forensics not in UTC? come on, please, guess what would happen if you were to ask logs to an ISP for a specific IP address at a certain timestamp not in UTC.. you might send an innocent on trial because of that.</p>
+
 </div>
 
 
@@ -192,6 +190,8 @@ So now if our assumption was correct, we need to figure out what was the timesta
         <a class="basic-alignment left" href="/blog/2014/10/09/su-ctf-2014-personalized-captcha/" title="Previous Post: SU-CTF 2014: Personalized Captcha">&laquo; SU-CTF 2014: Personalized Captcha</a>
       
       
+        <a class="basic-alignment right" href="/blog/2014/11/08/picoctf-2014-rsa-mistakes/" title="Next Post: picoCTF 2014: RSA Mistakes">picoCTF 2014: RSA Mistakes &raquo;</a>
+      
     </p>
   </footer>
 </article>
@@ -211,23 +211,23 @@ So now if our assumption was correct, we need to figure out what was the timesta
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/11/08/picoctf-2014-guess/">picoCTF 2014: Guess</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/08/picoctf-2014-tick-tock/">picoCTF 2014: Tick Tock</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/08/picoctf-2014-steves-list/">picoCTF 2014: Steve&#8217;s List</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/08/picoctf-2014-rsa-mistakes/">picoCTF 2014: RSA Mistakes</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/10/23/asis-ctf-finals-2014-important-day/">ASIS-CTF Finals 2014: Important Day</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/09/su-ctf-2014-personalized-captcha/">SU-CTF 2014: Personalized Captcha</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/06/vulnhub-competition-persistence/">Vulnhub Competition: Persistence</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/28/csaw-2014-fluffy-no-more/">CSAW 2014: Fluffy No More</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/24/csaw-2014-saturn-walkthrough/">CSAW 2014: Saturn Walkthrough</a>
       </li>
     
   </ul>
@@ -287,5 +287,19 @@ So now if our assumption was correct, we need to figure out what was the timesta
 
 
 
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
 </body>
 </html>

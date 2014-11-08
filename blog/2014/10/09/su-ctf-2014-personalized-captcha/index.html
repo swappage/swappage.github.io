@@ -9,7 +9,7 @@
   <meta name="author" content="Swappage">
 
   
-  <meta name="description" content="Second CTF for the VulnHub team, and lots of fun with these puzzles. This writeup is all about an interesting forensics and web game named &ldquo; &hellip;">
+  <meta name="description" content="Second CTF for the VulnHub team, and lots of fun with these puzzles. This writeup is all about an interesting forensics and web game named “ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -87,10 +87,9 @@
 
 <div class="entry-content"><p>Second CTF for the VulnHub team, and lots of fun with these puzzles.</p>
 
-<p>This writeup is all about an interesting forensics and web game named &ldquo;Personalized captcha&rdquo; where the players were challenged to discover the value of a captcha string by analizing a provided pcap file.</p>
+<p>This writeup is all about an interesting forensics and web game named “Personalized captcha” where the players were challenged to discover the value of a captcha string by analizing a provided pcap file.</p>
 
 <!-- more -->
-
 
 <p>The pcap file was ~9MB in size, which is not big, but for sure bigger then usual for a CTF puzzle, and by a first look at it using wireshark it looked fairly messy, especially in terms of HTTP traffic, considering that a fairly good amount of HTTP requests and streams where in there.</p>
 
@@ -98,279 +97,274 @@
 
 <p>This tool is excellent for dissecting even big (100MB+) pcap files, and has really powerful filtering and search features, especially when you need to rebuild content for analysis, like web pages, images, audio files, voip communications and so on.</p>
 
-<p><img class="center" src="/images/2014-10-09/packet_summary.png"></p>
+<p><img class="center" src="/images/2014-10-09/packet_summary.png" /></p>
 
 <p>Punching the pcap into the software made things clearer and more understandable then by simply looking at raw packets in wireshark, and in the first place i started looking at the sites the user visited.</p>
 
 <p>The challenge hinted the players about the domain <em>captcha.ctf.sharif.edu</em> being down, which of course dragged me into digging more in depth about anything that i could find in the pcap about that domain.</p>
 
-<p><img class="center" src="/images/2014-10-09/sharif_captcha.png"></p>
+<p><img class="center" src="/images/2014-10-09/sharif_captcha.png" /></p>
 
-<p>A quick search revealed that the user for whom we were trying to rebuild the captcha actually visited that site; i focused some effort in dissecting the communications between the user and the server, i went sure on a post request that seemed interesting but unfortunately the user never really submitted the captcha, so, unfortunately, not a chance to grab it from the POST request, even if it wasn&rsquo;t encrypted.</p>
+<p>A quick search revealed that the user for whom we were trying to rebuild the captcha actually visited that site; i focused some effort in dissecting the communications between the user and the server, i went sure on a post request that seemed interesting but unfortunately the user never really submitted the captcha, so, unfortunately, not a chance to grab it from the POST request, even if it wasn’t encrypted.</p>
 
-<p><img class="center" src="/images/2014-10-09/post.png"></p>
+<p><img class="center" src="/images/2014-10-09/post.png" /></p>
 
-<p>Well, in the end this was a 300 points worth puzzle, wouldn&rsquo;t it be too easy that way?</p>
+<p>Well, in the end this was a 300 points worth puzzle, wouldn’t it be too easy that way?</p>
 
 <p>Anyway, back to the challenge, at this point it was probably a good idea to try to rebuild the pages content.</p>
 
 <p>Xplico in these things really rocks the world, because it can preview the content of web pages by rebuilding them entirely off a pcap file, i tried previewing the page as i usually do, but this time something went wrong.</p>
 
-<p><img class="center" src="/images/2014-10-09/badpage.png"></p>
+<p><img class="center" src="/images/2014-10-09/badpage.png" /></p>
 
 <p>For the good actually, because this helped me in understanding the point of the puzzle (more on this later), but the page looked really weird, by quickly inspecting the source, I noticed that 2 CSS files were included in the html, but if we look at them in Xplico we can notice that the <em>style.css</em> was 0 bytes in size.</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="cp">&lt;!doctype html&gt;</span>
-</span><span class='line'><span class="nt">&lt;html&gt;</span>
-</span><span class='line'><span class="nt">&lt;head&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">&quot;UTF-8&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;title&gt;</span>The Captcha<span class="nt">&lt;/title&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;css/bootstrap.css&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;css/style.css&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'><span class="nt">&lt;/head&gt;</span>
-</span><span class='line'><span class="nt">&lt;body&gt;</span>
-</span><span class='line'>...
-</span><span class='line'><span class="nt">&lt;/body&gt;</span>
-</span><span class='line'><span class="nt">&lt;/html&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</pre></td><td class="code"><pre><code class="html"><span class="line"><span class="cp">&lt;!doctype html&gt;</span>
+</span><span class="line"><span class="nt">&lt;html&gt;</span>
+</span><span class="line"><span class="nt">&lt;head&gt;</span>
+</span><span class="line">	<span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">&quot;UTF-8&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">	<span class="nt">&lt;title&gt;</span>The Captcha<span class="nt">&lt;/title&gt;</span>
+</span><span class="line">	<span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;css/bootstrap.css&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">	<span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;css/style.css&quot;</span><span class="nt">&gt;</span>
+</span><span class="line"><span class="nt">&lt;/head&gt;</span>
+</span><span class="line"><span class="nt">&lt;body&gt;</span>
+</span><span class="line">...
+</span><span class="line"><span class="nt">&lt;/body&gt;</span>
+</span><span class="line"><span class="nt">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
+<p><img class="center" src="/images/2014-10-09/wrongsize.png" /></p>
 
-<p><img class="center" src="/images/2014-10-09/wrongsize.png"></p>
-
-<p>mhh.. odd isn&rsquo;t it? i double checked using wireshark and it actually resulted that something DID went wrong in pcap dissection by Xplico, did the challenge author know something i didn&rsquo;t? was this done on purpose?</p>
+<p>mhh.. odd isn’t it? i double checked using wireshark and it actually resulted that something DID went wrong in pcap dissection by Xplico, did the challenge author know something i didn’t? was this done on purpose?</p>
 
 <p>Yet, wireshark revealed the truth and at this point i decided to export the files directly from wireshark and restore their original paths so that the page would display properly; luckly wireshark provides an awesome feature to export files from HTTP strams, so it was just a matter of a couple of mouse clicks to get everything i needed.</p>
 
 <p>Opening the web page in the browser revealed what was the page as it appeared to the user whom this traffic capture belonged to</p>
 
-<p><img class="center" src="/images/2014-10-09/wholepage.png"></p>
+<p><img class="center" src="/images/2014-10-09/wholepage.png" /></p>
 
 <p>except for the fact, that the captcha was empty.</p>
 
 <p>Yet, pieces of the puzzle were starting to make sense if put togeder; now i had a captcha field, but where are the links that i could see without the <em>style.css</em>?</p>
 
-<p>Let&rsquo;s take a look at the whole page code</p>
+<p>Let’s take a look at the whole page code</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="cp">&lt;!doctype html&gt;</span>
-</span><span class='line'><span class="nt">&lt;html&gt;</span>
-</span><span class='line'><span class="nt">&lt;head&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">&quot;UTF-8&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;title&gt;</span>The Captcha<span class="nt">&lt;/title&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;css/bootstrap.css&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;css/style.css&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'><span class="nt">&lt;/head&gt;</span>
-</span><span class='line'><span class="nt">&lt;body&gt;</span>
-</span><span class='line'><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;container&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;row&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;col-xs-8 col-xs-offset-2 col-md-6 col-md-offset-3&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>          <span class="nt">&lt;form</span> <span class="na">method=</span><span class="s">&quot;post&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>              <span class="nt">&lt;textarea</span> <span class="na">class=</span><span class="s">&quot;form-control mb5&quot;</span> <span class="na">placeholder=</span><span class="s">&quot;comment&quot;</span> <span class="na">name=</span><span class="s">&quot;comment&quot;</span><span class="nt">&gt;&lt;/textarea&gt;</span>
-</span><span class='line'>              <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">class=</span><span class="s">&quot;form-control mb5&quot;</span> <span class="na">placeholder=</span><span class="s">&quot;captcha&quot;</span> <span class="na">name=</span><span class="s">&quot;captcha&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>              <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;captcha&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://en.wikipedia.org/wiki/Hack&quot;</span><span class="nt">&gt;</span>P<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>                  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://wordpress.org/plugins/captcha/&quot;</span><span class="nt">&gt;</span>E<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>                  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://wordpress.org/mobile/&quot;</span><span class="nt">&gt;</span>A<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>                  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://captchas.net/&quot;</span><span class="nt">&gt;</span>C<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>                  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://en.wikipedia.org/wiki/Hack&quot;</span><span class="nt">&gt;</span>E<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>
-</span><span class='line'>                  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.thefreedictionary.com/hack&quot;</span><span class="nt">&gt;</span>Y<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>                  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.php.net/manual/en/security.database.sql-injection.php&quot;</span><span class="nt">&gt;</span>E<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>                  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.unixwiz.net/techtips/sql-injection.html&quot;</span><span class="nt">&gt;</span>T<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>
-</span><span class='line'>                  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.google.com/recaptcha/intro/index.html&quot;</span><span class="nt">&gt;</span>V<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>                  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://en.wikipedia.org/wiki/OWASP&quot;</span><span class="nt">&gt;</span>U<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>                  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.phpcaptcha.org/documentation/quickstart-guide/&quot;</span><span class="nt">&gt;</span>L<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>
-</span><span class='line'>                  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.merriam-webster.com/dictionary/hack&quot;</span><span class="nt">&gt;</span>A<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>                  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.urbandictionary.com/define.php?term=hack&quot;</span><span class="nt">&gt;</span>N<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>                  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.hackthissite.org/&quot;</span><span class="nt">&gt;</span>D<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>
-</span><span class='line'>                  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.phpcaptcha.org/posts/wordpress-plugin-released/&quot;</span><span class="nt">&gt;</span>A<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>
-</span><span class='line'>                  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://en.wiktionary.org/wiki/hack&quot;</span><span class="nt">&gt;</span>H<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>                  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.captcha.net/&quot;</span><span class="nt">&gt;</span>A<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>                  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://captchas.net/sample/php/&quot;</span><span class="nt">&gt;</span>C<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>                  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.phpcaptcha.org/download/wordpress-plugin/&quot;</span><span class="nt">&gt;</span>K<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>              <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>              <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">&quot;submit&quot;</span> <span class="na">class=</span><span class="s">&quot;btn btn-primary btn-block&quot;</span><span class="nt">&gt;</span>send<span class="nt">&lt;/button&gt;</span>
-</span><span class='line'>          <span class="nt">&lt;/form&gt;</span>
-</span><span class='line'>      <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'><span class="nt">&lt;/div&gt;</span>
-</span><span class='line'><span class="nt">&lt;/body&gt;</span>
-</span><span class='line'><span class="nt">&lt;/html&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+<span class="line-number">45</span>
+<span class="line-number">46</span>
+<span class="line-number">47</span>
+<span class="line-number">48</span>
+<span class="line-number">49</span>
+</pre></td><td class="code"><pre><code class="html"><span class="line"><span class="cp">&lt;!doctype html&gt;</span>
+</span><span class="line"><span class="nt">&lt;html&gt;</span>
+</span><span class="line"><span class="nt">&lt;head&gt;</span>
+</span><span class="line">	<span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">&quot;UTF-8&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">	<span class="nt">&lt;title&gt;</span>The Captcha<span class="nt">&lt;/title&gt;</span>
+</span><span class="line">	<span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;css/bootstrap.css&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">	<span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;css/style.css&quot;</span><span class="nt">&gt;</span>
+</span><span class="line"><span class="nt">&lt;/head&gt;</span>
+</span><span class="line"><span class="nt">&lt;body&gt;</span>
+</span><span class="line"><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;container&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">	<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;row&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">		<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;col-xs-8 col-xs-offset-2 col-md-6 col-md-offset-3&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">			<span class="nt">&lt;form</span> <span class="na">method=</span><span class="s">&quot;post&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">				<span class="nt">&lt;textarea</span> <span class="na">class=</span><span class="s">&quot;form-control mb5&quot;</span> <span class="na">placeholder=</span><span class="s">&quot;comment&quot;</span> <span class="na">name=</span><span class="s">&quot;comment&quot;</span><span class="nt">&gt;&lt;/textarea&gt;</span>
+</span><span class="line">				<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">class=</span><span class="s">&quot;form-control mb5&quot;</span> <span class="na">placeholder=</span><span class="s">&quot;captcha&quot;</span> <span class="na">name=</span><span class="s">&quot;captcha&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">
+</span><span class="line">				<span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;captcha&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">					<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://en.wikipedia.org/wiki/Hack&quot;</span><span class="nt">&gt;</span>P<span class="nt">&lt;/a&gt;</span>
+</span><span class="line">					<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://wordpress.org/plugins/captcha/&quot;</span><span class="nt">&gt;</span>E<span class="nt">&lt;/a&gt;</span>
+</span><span class="line">					<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://wordpress.org/mobile/&quot;</span><span class="nt">&gt;</span>A<span class="nt">&lt;/a&gt;</span>
+</span><span class="line">					<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://captchas.net/&quot;</span><span class="nt">&gt;</span>C<span class="nt">&lt;/a&gt;</span>
+</span><span class="line">					<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://en.wikipedia.org/wiki/Hack&quot;</span><span class="nt">&gt;</span>E<span class="nt">&lt;/a&gt;</span>
+</span><span class="line">
+</span><span class="line">					<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.thefreedictionary.com/hack&quot;</span><span class="nt">&gt;</span>Y<span class="nt">&lt;/a&gt;</span>
+</span><span class="line">					<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.php.net/manual/en/security.database.sql-injection.php&quot;</span><span class="nt">&gt;</span>E<span class="nt">&lt;/a&gt;</span>
+</span><span class="line">					<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.unixwiz.net/techtips/sql-injection.html&quot;</span><span class="nt">&gt;</span>T<span class="nt">&lt;/a&gt;</span>
+</span><span class="line">
+</span><span class="line">					<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.google.com/recaptcha/intro/index.html&quot;</span><span class="nt">&gt;</span>V<span class="nt">&lt;/a&gt;</span>
+</span><span class="line">					<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://en.wikipedia.org/wiki/OWASP&quot;</span><span class="nt">&gt;</span>U<span class="nt">&lt;/a&gt;</span>
+</span><span class="line">					<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.phpcaptcha.org/documentation/quickstart-guide/&quot;</span><span class="nt">&gt;</span>L<span class="nt">&lt;/a&gt;</span>
+</span><span class="line">
+</span><span class="line">					<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.merriam-webster.com/dictionary/hack&quot;</span><span class="nt">&gt;</span>A<span class="nt">&lt;/a&gt;</span>
+</span><span class="line">					<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.urbandictionary.com/define.php?term=hack&quot;</span><span class="nt">&gt;</span>N<span class="nt">&lt;/a&gt;</span>
+</span><span class="line">					<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.hackthissite.org/&quot;</span><span class="nt">&gt;</span>D<span class="nt">&lt;/a&gt;</span>
+</span><span class="line">
+</span><span class="line">					<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.phpcaptcha.org/posts/wordpress-plugin-released/&quot;</span><span class="nt">&gt;</span>A<span class="nt">&lt;/a&gt;</span>
+</span><span class="line">
+</span><span class="line">					<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://en.wiktionary.org/wiki/hack&quot;</span><span class="nt">&gt;</span>H<span class="nt">&lt;/a&gt;</span>
+</span><span class="line">					<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.captcha.net/&quot;</span><span class="nt">&gt;</span>A<span class="nt">&lt;/a&gt;</span>
+</span><span class="line">					<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://captchas.net/sample/php/&quot;</span><span class="nt">&gt;</span>C<span class="nt">&lt;/a&gt;</span>
+</span><span class="line">					<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://www.phpcaptcha.org/download/wordpress-plugin/&quot;</span><span class="nt">&gt;</span>K<span class="nt">&lt;/a&gt;</span>
+</span><span class="line">				<span class="nt">&lt;/div&gt;</span>
+</span><span class="line">				<span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">&quot;submit&quot;</span> <span class="na">class=</span><span class="s">&quot;btn btn-primary btn-block&quot;</span><span class="nt">&gt;</span>send<span class="nt">&lt;/button&gt;</span>
+</span><span class="line">			<span class="nt">&lt;/form&gt;</span>
+</span><span class="line">		<span class="nt">&lt;/div&gt;</span>
+</span><span class="line">	<span class="nt">&lt;/div&gt;</span>
+</span><span class="line"><span class="nt">&lt;/div&gt;</span>
+</span><span class="line"><span class="nt">&lt;/body&gt;</span>
+</span><span class="line"><span class="nt">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 <p>and at the <em>style.css</em></p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nf">#captcha</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">width</span><span class="o">:</span> <span class="m">300px</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">height</span><span class="o">:</span> <span class="m">100px</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">margin-right</span><span class="o">:</span> <span class="k">auto</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">margin-left</span><span class="o">:</span> <span class="k">auto</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">position</span><span class="o">:</span> <span class="k">relative</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">background-color</span><span class="o">:</span> <span class="m">#000000</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">white-space</span><span class="o">-</span><span class="k">collapse</span><span class="o">:</span> <span class="n">discard</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="nf">#captcha</span> <span class="nt">a</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">font-size</span><span class="o">:</span> <span class="m">15px</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">pointer</span><span class="o">-</span><span class="n">events</span><span class="o">:</span> <span class="k">none</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">cursor</span><span class="o">:</span> <span class="k">default</span><span class="p">;</span>
-</span><span class='line'>  <span class="o">-</span><span class="n">webkit</span><span class="o">-</span><span class="n">touch</span><span class="o">-</span><span class="n">callout</span><span class="o">:</span> <span class="k">none</span><span class="p">;</span>
-</span><span class='line'>  <span class="o">-</span><span class="n">webkit</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">select</span><span class="o">:</span> <span class="k">none</span><span class="p">;</span>
-</span><span class='line'>  <span class="o">-</span><span class="n">khtml</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">select</span><span class="o">:</span> <span class="k">none</span><span class="p">;</span>
-</span><span class='line'>  <span class="o">-</span><span class="n">moz</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">select</span><span class="o">:</span> <span class="k">none</span><span class="p">;</span>
-</span><span class='line'>  <span class="o">-</span><span class="n">ms</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">select</span><span class="o">:</span> <span class="k">none</span><span class="p">;</span>
-</span><span class='line'>  <span class="n">user</span><span class="o">-</span><span class="n">select</span><span class="o">:</span> <span class="k">none</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">position</span><span class="o">:</span> <span class="k">absolute</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">display</span><span class="o">:</span> <span class="k">inline</span><span class="o">-</span><span class="k">block</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="nf">#captcha</span> <span class="nt">a</span><span class="o">,</span>
-</span><span class='line'><span class="nf">#captcha</span> <span class="nt">a</span><span class="nd">:hover</span><span class="o">,</span>
-</span><span class='line'><span class="nf">#captcha</span> <span class="nt">a</span><span class="nd">:focus</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">color</span><span class="o">:</span> <span class="m">#000000</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="nf">#captcha</span> <span class="nt">a</span><span class="nd">:visited</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">color</span><span class="o">:</span> <span class="m">#ff0000</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="nf">#captcha</span> <span class="nt">a</span><span class="nd">:nth-child</span><span class="o">(</span><span class="nt">1</span><span class="o">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">left</span><span class="o">:</span> <span class="m">3.45699886px</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">top</span><span class="o">:</span> <span class="m">26.46903004px</span><span class="p">;</span>
-</span><span class='line'>  <span class="o">-</span><span class="n">webkit</span><span class="o">-</span><span class="n">transform</span><span class="o">:</span> <span class="n">rotate</span><span class="p">(</span><span class="m">-3</span><span class="o">.</span><span class="m">45879735</span><span class="n">deg</span><span class="p">);</span>
-</span><span class='line'>  <span class="o">-</span><span class="n">ms</span><span class="o">-</span><span class="n">transform</span><span class="o">:</span> <span class="n">rotate</span><span class="p">(</span><span class="m">-3</span><span class="o">.</span><span class="m">45879735</span><span class="n">deg</span><span class="p">);</span>
-</span><span class='line'>  <span class="n">transform</span><span class="o">:</span> <span class="n">rotate</span><span class="p">(</span><span class="m">-3</span><span class="o">.</span><span class="m">45879735</span><span class="n">deg</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="nf">#captcha</span> <span class="nt">a</span><span class="nd">:nth-child</span><span class="o">(</span><span class="nt">2</span><span class="o">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">left</span><span class="o">:</span> <span class="m">19.42964103px</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">top</span><span class="o">:</span> <span class="m">28.76705699px</span><span class="p">;</span>
-</span><span class='line'>  <span class="o">-</span><span class="n">webkit</span><span class="o">-</span><span class="n">transform</span><span class="o">:</span> <span class="n">rotate</span><span class="p">(</span><span class="m">-9</span><span class="o">.</span><span class="m">34001927</span><span class="n">deg</span><span class="p">);</span>
-</span><span class='line'>  <span class="o">-</span><span class="n">ms</span><span class="o">-</span><span class="n">transform</span><span class="o">:</span> <span class="n">rotate</span><span class="p">(</span><span class="m">-9</span><span class="o">.</span><span class="m">34001927</span><span class="n">deg</span><span class="p">);</span>
-</span><span class='line'>  <span class="n">transform</span><span class="o">:</span> <span class="n">rotate</span><span class="p">(</span><span class="m">-9</span><span class="o">.</span><span class="m">34001927</span><span class="n">deg</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+</pre></td><td class="code"><pre><code class="css"><span class="line"><span class="nf">#captcha</span> <span class="p">{</span>
+</span><span class="line">  <span class="k">width</span><span class="o">:</span> <span class="m">300px</span><span class="p">;</span>
+</span><span class="line">  <span class="k">height</span><span class="o">:</span> <span class="m">100px</span><span class="p">;</span>
+</span><span class="line">  <span class="k">margin-right</span><span class="o">:</span> <span class="k">auto</span><span class="p">;</span>
+</span><span class="line">  <span class="k">margin-left</span><span class="o">:</span> <span class="k">auto</span><span class="p">;</span>
+</span><span class="line">  <span class="k">position</span><span class="o">:</span> <span class="k">relative</span><span class="p">;</span>
+</span><span class="line">  <span class="k">background-color</span><span class="o">:</span> <span class="m">#000000</span><span class="p">;</span>
+</span><span class="line">  <span class="k">white-space</span><span class="o">-</span><span class="k">collapse</span><span class="o">:</span> <span class="n">discard</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line"><span class="nf">#captcha</span> <span class="nt">a</span> <span class="p">{</span>
+</span><span class="line">  <span class="k">font-size</span><span class="o">:</span> <span class="m">15px</span><span class="p">;</span>
+</span><span class="line">  <span class="k">pointer</span><span class="o">-</span><span class="n">events</span><span class="o">:</span> <span class="k">none</span><span class="p">;</span>
+</span><span class="line">  <span class="k">cursor</span><span class="o">:</span> <span class="k">default</span><span class="p">;</span>
+</span><span class="line">  <span class="o">-</span><span class="n">webkit</span><span class="o">-</span><span class="n">touch</span><span class="o">-</span><span class="n">callout</span><span class="o">:</span> <span class="k">none</span><span class="p">;</span>
+</span><span class="line">  <span class="o">-</span><span class="n">webkit</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">select</span><span class="o">:</span> <span class="k">none</span><span class="p">;</span>
+</span><span class="line">  <span class="o">-</span><span class="n">khtml</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">select</span><span class="o">:</span> <span class="k">none</span><span class="p">;</span>
+</span><span class="line">  <span class="o">-</span><span class="n">moz</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">select</span><span class="o">:</span> <span class="k">none</span><span class="p">;</span>
+</span><span class="line">  <span class="o">-</span><span class="n">ms</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">select</span><span class="o">:</span> <span class="k">none</span><span class="p">;</span>
+</span><span class="line">  <span class="n">user</span><span class="o">-</span><span class="n">select</span><span class="o">:</span> <span class="k">none</span><span class="p">;</span>
+</span><span class="line">  <span class="k">position</span><span class="o">:</span> <span class="k">absolute</span><span class="p">;</span>
+</span><span class="line">  <span class="k">display</span><span class="o">:</span> <span class="k">inline</span><span class="o">-</span><span class="k">block</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line"><span class="nf">#captcha</span> <span class="nt">a</span><span class="o">,</span>
+</span><span class="line"><span class="nf">#captcha</span> <span class="nt">a</span><span class="nd">:hover</span><span class="o">,</span>
+</span><span class="line"><span class="nf">#captcha</span> <span class="nt">a</span><span class="nd">:focus</span> <span class="p">{</span>
+</span><span class="line">  <span class="k">color</span><span class="o">:</span> <span class="m">#000000</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line"><span class="nf">#captcha</span> <span class="nt">a</span><span class="nd">:visited</span> <span class="p">{</span>
+</span><span class="line">  <span class="k">color</span><span class="o">:</span> <span class="m">#ff0000</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line"><span class="nf">#captcha</span> <span class="nt">a</span><span class="nd">:nth-child</span><span class="o">(</span><span class="nt">1</span><span class="o">)</span> <span class="p">{</span>
+</span><span class="line">  <span class="k">left</span><span class="o">:</span> <span class="m">3.45699886px</span><span class="p">;</span>
+</span><span class="line">  <span class="k">top</span><span class="o">:</span> <span class="m">26.46903004px</span><span class="p">;</span>
+</span><span class="line">  <span class="o">-</span><span class="n">webkit</span><span class="o">-</span><span class="n">transform</span><span class="o">:</span> <span class="n">rotate</span><span class="p">(</span><span class="m">-3</span><span class="o">.</span><span class="m">45879735</span><span class="n">deg</span><span class="p">);</span>
+</span><span class="line">  <span class="o">-</span><span class="n">ms</span><span class="o">-</span><span class="n">transform</span><span class="o">:</span> <span class="n">rotate</span><span class="p">(</span><span class="m">-3</span><span class="o">.</span><span class="m">45879735</span><span class="n">deg</span><span class="p">);</span>
+</span><span class="line">  <span class="n">transform</span><span class="o">:</span> <span class="n">rotate</span><span class="p">(</span><span class="m">-3</span><span class="o">.</span><span class="m">45879735</span><span class="n">deg</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line"><span class="nf">#captcha</span> <span class="nt">a</span><span class="nd">:nth-child</span><span class="o">(</span><span class="nt">2</span><span class="o">)</span> <span class="p">{</span>
+</span><span class="line">  <span class="k">left</span><span class="o">:</span> <span class="m">19.42964103px</span><span class="p">;</span>
+</span><span class="line">  <span class="k">top</span><span class="o">:</span> <span class="m">28.76705699px</span><span class="p">;</span>
+</span><span class="line">  <span class="o">-</span><span class="n">webkit</span><span class="o">-</span><span class="n">transform</span><span class="o">:</span> <span class="n">rotate</span><span class="p">(</span><span class="m">-9</span><span class="o">.</span><span class="m">34001927</span><span class="n">deg</span><span class="p">);</span>
+</span><span class="line">  <span class="o">-</span><span class="n">ms</span><span class="o">-</span><span class="n">transform</span><span class="o">:</span> <span class="n">rotate</span><span class="p">(</span><span class="m">-9</span><span class="o">.</span><span class="m">34001927</span><span class="n">deg</span><span class="p">);</span>
+</span><span class="line">  <span class="n">transform</span><span class="o">:</span> <span class="n">rotate</span><span class="p">(</span><span class="m">-9</span><span class="o">.</span><span class="m">34001927</span><span class="n">deg</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
+<p>Oh… Ok, now i get it, the links are building the captcha!</p>
 
-<p>Oh&hellip; Ok, now i get it, the links are building the captcha!</p>
+<p>Let’s try this out: i tried to visit one of the links from the page source, so that they would appear as visited to the browser, and by refreshing the captcha page i was presented with a pleasant surprise.</p>
 
-<p>Let&rsquo;s try this out: i tried to visit one of the links from the page source, so that they would appear as visited to the browser, and by refreshing the captcha page i was presented with a pleasant surprise.</p>
-
-<p><img class="center" src="/images/2014-10-09/partial_captcha.png"></p>
+<p><img class="center" src="/images/2014-10-09/partial_captcha.png" /></p>
 
 <p>So now i had the point of the challenge! Basically the captcha string depended on the sites visited by the user, what i needed to do, to obtain the captcha string was to verify which sites among the ones in the captcha page were present in the pcap, respecting the following criteria:</p>
 
 <ul>
-<li>the site should have been visited before <a href="http://captcha.ctf.sharif.edu/captcha/">http://captcha.ctf.sharif.edu/captcha/</a> was visited (there were a couple of browsing sessions after that)</li>
-<li>the source ip address should have been the same (better making sure not to include other potential users)</li>
-<li>the browser used should have been always the same as the one used for visiting the captcha page (in the pcap multiple user agents were present)</li>
+  <li>the site should have been visited before http://captcha.ctf.sharif.edu/captcha/ was visited (there were a couple of browsing sessions after that)</li>
+  <li>the source ip address should have been the same (better making sure not to include other potential users)</li>
+  <li>the browser used should have been always the same as the one used for visiting the captcha page (in the pcap multiple user agents were present)</li>
 </ul>
-
 
 <p>doing the search by end in wireshark would have been frustrating, even by using filters, so i created a filter like the following</p>
 
@@ -379,36 +373,35 @@
 
 <p>And with the help of some basic bash scripting i cycled through the links in the captcha page to see if they were visited or not.</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#!/bin/bash</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">URLS</span><span class="o">=</span><span class="k">$(</span>grep <span class="s2">&quot;a href&quot;</span> captcha.htm <span class="p">|</span> awk -F <span class="s1">&#39;\&quot;&#39;</span> <span class="s1">&#39;{print $2}&#39;</span><span class="k">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">for</span> url in <span class="nv">$URLS</span><span class="p">;</span> <span class="k">do</span>
-</span><span class='line'>      <span class="nv">FILTER</span><span class="o">=</span><span class="s2">&quot;frame.number &lt; 14127 &amp;&amp; ip.src == 10.10.12.30 &amp;&amp; http.user_agent == \&quot;Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.11 (KHTML, like Gecko) Ubuntu/12.04 Chromium/20.0.1132.47 Chrome/20.0.1132.47 Safari/536.11\&quot; &amp;&amp; http.request.full_uri == \&quot;$url\&quot;&quot;</span>
-</span><span class='line'>      <span class="nv">VISITED</span><span class="o">=</span><span class="k">$(</span>tshark -R <span class="s2">&quot;$FILTER&quot;</span> -r captcha.pcap 2&gt; /dev/null <span class="p">|</span> wc -l<span class="k">)</span>
-</span><span class='line'>      <span class="k">if</span> <span class="o">[</span> <span class="nv">$VISITED</span> -ne <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
-</span><span class='line'>              <span class="nb">echo</span> <span class="nv">$url</span>
-</span><span class='line'>      <span class="k">fi</span>
-</span><span class='line'><span class="k">done</span>
-</span></code></pre></td></tr></table></div></figure>
-
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="c">#!/bin/bash</span>
+</span><span class="line">
+</span><span class="line"><span class="nv">URLS</span><span class="o">=</span><span class="k">$(</span>grep <span class="s2">&quot;a href&quot;</span> captcha.htm <span class="p">|</span> awk -F <span class="s1">&#39;\&quot;&#39;</span> <span class="s1">&#39;{print $2}&#39;</span><span class="k">)</span>
+</span><span class="line">
+</span><span class="line"><span class="k">for</span> url in <span class="nv">$URLS</span><span class="p">;</span> <span class="k">do</span>
+</span><span class="line">		<span class="nv">FILTER</span><span class="o">=</span><span class="s2">&quot;frame.number &lt; 14127 &amp;&amp; ip.src == 10.10.12.30 &amp;&amp; http.user_agent == \&quot;Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.11 (KHTML, like Gecko) Ubuntu/12.04 Chromium/20.0.1132.47 Chrome/20.0.1132.47 Safari/536.11\&quot; &amp;&amp; http.request.full_uri == \&quot;$url\&quot;&quot;</span>
+</span><span class="line">		<span class="nv">VISITED</span><span class="o">=</span><span class="k">$(</span>tshark -R <span class="s2">&quot;$FILTER&quot;</span> -r captcha.pcap 2&gt; /dev/null <span class="p">|</span> wc -l<span class="k">)</span>
+</span><span class="line">		<span class="k">if</span> <span class="o">[</span> <span class="nv">$VISITED</span> -ne <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span><span class="line">				<span class="nb">echo</span> <span class="nv">$url</span>
+</span><span class="line">		<span class="k">fi</span>
+</span><span class="line"><span class="k">done</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>All was left to do was to take the returned URLs, open them in the browser and see the resulting captcha</p>
 
-<p><img class="center" src="/images/2014-10-09/solvedcaptcha.png"></p>
+<p><img class="center" src="/images/2014-10-09/solvedcaptcha.png" /></p>
 
-<p>What else can i say? well, i think i&rsquo;ll probably submit this pcap file to the Xplico dev team so that they can check why <em>style.css</em> wasn&rsquo;t decoded properly.</p>
+<p>What else can i say? well, i think i’ll probably submit this pcap file to the Xplico dev team so that they can check why <em>style.css</em> wasn’t decoded properly.</p>
 </div>
 
 
@@ -471,23 +464,23 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/11/08/picoctf-2014-guess/">picoCTF 2014: Guess</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/08/picoctf-2014-tick-tock/">picoCTF 2014: Tick Tock</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/08/picoctf-2014-steves-list/">picoCTF 2014: Steve&#8217;s List</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/08/picoctf-2014-rsa-mistakes/">picoCTF 2014: RSA Mistakes</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/10/23/asis-ctf-finals-2014-important-day/">ASIS-CTF Finals 2014: Important Day</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/09/su-ctf-2014-personalized-captcha/">SU-CTF 2014: Personalized Captcha</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/06/vulnhub-competition-persistence/">Vulnhub Competition: Persistence</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/28/csaw-2014-fluffy-no-more/">CSAW 2014: Fluffy No More</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/24/csaw-2014-saturn-walkthrough/">CSAW 2014: Saturn Walkthrough</a>
       </li>
     
   </ul>
@@ -547,5 +540,19 @@
 
 
 
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
 </body>
 </html>

@@ -1,0 +1,456 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>picoCTF 2014: Tick Tock - The Swappage Playground</title>
+  <meta name="author" content="Swappage">
+
+  
+  <meta name="description" content="Math, math, and more math! :) There was a loth of math in this picoCTF, and Tick Tock was a pretty cool one. The problem was under the reverse &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://swappage.github.io/blog/2014/11/08/picoctf-2014-tick-tock">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="The Swappage Playground" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">The Swappage Playground</a></h1>
+  
+    <h2>Because in the end, what does matter is having fun.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:swappage.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">picoCTF 2014: Tick Tock</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-11-08T21:49:30+01:00'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>9:49 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Math, math, and more math! :)</p>
+
+<p>There was a loth of math in this picoCTF, and Tick Tock was a pretty cool one.</p>
+
+<p>The problem was under the reverse engineering category, but it was definitely mor math related then reverse engineering, as all you had to understand in terms of verersing, was what the python script was doing.</p>
+
+<!-- more -->
+
+<p>If we remove all the visualization stuff, for spinning the clock all the problem revolves around these functions</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">msg</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+</span><span class="line">  <span class="c"># n % m</span>
+</span><span class="line">  <span class="n">spin_for</span> <span class="o">=</span> <span class="nb">min</span><span class="p">((</span><span class="n">m</span><span class="o">*</span><span class="mi">10</span><span class="p">),</span><span class="n">n</span><span class="p">)</span>
+</span><span class="line">  <span class="n">nspots</span> <span class="o">=</span> <span class="mi">112</span>
+</span><span class="line">  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">spin_for</span><span class="p">,</span><span class="n">m</span><span class="o">/</span><span class="n">nspots</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+</span><span class="line">	<span class="n">speed</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="p">((</span><span class="n">spin_for</span><span class="o">-</span><span class="n">i</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">m</span><span class="o">/</span><span class="n">nspots</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+</span><span class="line">	<span class="n">printc</span><span class="p">(</span><span class="n">clock</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">i</span><span class="o">+</span><span class="n">n</span><span class="o">-</span><span class="n">spin_for</span><span class="p">,</span><span class="n">m</span><span class="p">),</span><span class="n">msg</span><span class="p">)</span>
+</span><span class="line">	<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">speed</span><span class="p">)</span>
+</span><span class="line">  <span class="k">if</span> <span class="n">m</span><span class="o">/</span><span class="n">nspots</span><span class="o">+</span><span class="mi">1</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+</span><span class="line">	<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">spin_for</span><span class="p">,</span><span class="nb">max</span><span class="p">((</span><span class="n">spin_for</span><span class="o">-</span><span class="n">i</span><span class="p">)</span><span class="o">/</span><span class="mi">50</span><span class="p">,</span><span class="mi">1</span><span class="p">)):</span>
+</span><span class="line">	  <span class="n">printc</span><span class="p">(</span><span class="n">clock</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">j</span><span class="o">+</span><span class="n">n</span><span class="o">-</span><span class="n">spin_for</span><span class="p">,</span><span class="n">m</span><span class="p">),</span><span class="n">msg</span><span class="p">)</span>
+</span><span class="line">  <span class="n">printc</span><span class="p">(</span><span class="n">clock</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">),</span><span class="n">msg</span><span class="p">)</span>
+</span><span class="line">  <span class="k">return</span> <span class="n">n</span><span class="o">%</span><span class="n">m</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>the count() function: that is nothing but a modulus operation with some ascii art :)</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="k">def</span> <span class="nf">powmod</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">msg</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+</span><span class="line">  <span class="c"># n^p % m</span>
+</span><span class="line">  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">p</span><span class="o">-</span><span class="mi">100</span><span class="p">),</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+</span><span class="line">	<span class="n">speed</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">p</span><span class="o">-</span><span class="n">i</span><span class="p">)</span>
+</span><span class="line">	<span class="n">printc</span><span class="p">(</span><span class="n">clock</span><span class="p">(</span><span class="nb">pow</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">m</span><span class="p">),</span><span class="n">m</span><span class="p">),</span><span class="n">msg</span><span class="p">)</span>
+</span><span class="line">	<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">speed</span><span class="p">)</span>
+</span><span class="line">  <span class="k">return</span> <span class="nb">pow</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">m</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>and the powmod() function: which is nothing but a pow, again with some graphics for displaying the clock.</p>
+
+<p>then the application does the following:</p>
+
+<p>it takes the first argument number we supply, it takes the list named secretz, containing 17 tuples</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="n">secretz</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">13</span><span class="p">),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">29</span><span class="p">),</span> <span class="p">(</span><span class="mi">130</span><span class="p">,</span> <span class="mi">191</span><span class="p">),</span> <span class="p">(</span><span class="mi">343</span><span class="p">,</span> <span class="mi">397</span><span class="p">),</span> <span class="p">(</span><span class="mi">652</span><span class="p">,</span> <span class="mi">691</span><span class="p">),</span> <span class="p">(</span><span class="mi">858</span><span class="p">,</span> <span class="mi">1009</span><span class="p">),</span>
+</span><span class="line">       <span class="p">(</span><span class="mi">689</span><span class="p">,</span> <span class="mi">2039</span><span class="p">),</span> <span class="p">(</span><span class="mi">1184</span><span class="p">,</span> <span class="mi">4099</span><span class="p">),</span> <span class="p">(</span><span class="mi">2027</span><span class="p">,</span> <span class="mi">7001</span><span class="p">),</span> <span class="p">(</span><span class="mi">5119</span><span class="p">,</span> <span class="mi">10009</span><span class="p">),</span> <span class="p">(</span><span class="mi">15165</span><span class="p">,</span> <span class="mi">19997</span><span class="p">),</span> <span class="p">(</span><span class="mi">15340</span><span class="p">,</span> <span class="mi">30013</span><span class="p">),</span>
+</span><span class="line">       <span class="p">(</span><span class="mi">29303</span><span class="p">,</span> <span class="mi">70009</span><span class="p">),</span> <span class="p">(</span><span class="mi">42873</span><span class="p">,</span> <span class="mi">160009</span><span class="p">),</span> <span class="p">(</span><span class="mi">158045</span><span class="p">,</span> <span class="mi">200009</span><span class="p">)]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>and cycles over each tuple using the count() function, which as said earlier is nothing but a modulus operation.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="k">for</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">m</span><span class="p">)</span> <span class="ow">in</span> <span class="n">secretz</span><span class="p">:</span>
+</span><span class="line">  <span class="k">if</span> <span class="n">count</span><span class="p">(</span><span class="n">num</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="s">&quot;</span><span class="si">%d</span><span class="s"> </span><span class="si">%%</span><span class="s"> </span><span class="si">%d</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">num</span><span class="p">,</span><span class="n">m</span><span class="p">))</span> <span class="o">!=</span> <span class="n">r</span><span class="p">:</span>
+</span><span class="line">	<span class="k">print</span>
+</span><span class="line">	<span class="k">print</span> <span class="s">&quot;</span><span class="si">%d</span><span class="s"> </span><span class="si">%%</span><span class="s"> </span><span class="si">%d</span><span class="s"> != </span><span class="si">%d</span><span class="s">... WRONG&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">num</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">r</span><span class="p">)</span>
+</span><span class="line">	<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span class="line">  <span class="k">else</span><span class="p">:</span>
+</span><span class="line">	<span class="k">print</span>
+</span><span class="line">	<span class="k">print</span> <span class="s">&quot;</span><span class="si">%d</span><span class="s"> </span><span class="si">%%</span><span class="s"> </span><span class="si">%d</span><span class="s"> == </span><span class="si">%d</span><span class="s">... GOOD&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">num</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">r</span><span class="p">)</span>
+</span><span class="line">	<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span class="line">	<span class="k">print</span> <span class="s">&#39;</span><span class="se">\033</span><span class="s">[2A&#39;</span>
+</span><span class="line">	<span class="k">print</span> <span class="s">&quot; &quot;</span><span class="o">*</span><span class="mi">90</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>it performs the modulus operation between the number we supplied and the second value of the tuple, and checks that the result of the operation matches the first value, if the result is correct it procedes to the next tuple, if it fails, it exits.</p>
+
+<p>for example, if we assume that x is the first argument we submitted it checks that the following statement is true</p>
+
+<script type="math/tex; mode=display">
+\begin{align}
+x \equiv 1 \pmod{2}
+\end{align}
+</script>
+
+<p>and if it is, it performs the check for the next tuple.</p>
+
+<p>So the first part of the problem was to find a value x that would satisfy the equivalence for every tuple in the secretz list.</p>
+
+<p>This problem can be solved using the <em>chinese residiant theorem</em>
+which can be implemented in python as follows:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="c">#!/usr/bin/python</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">mul_inv</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+</span><span class="line">	<span class="n">b0</span> <span class="o">=</span> <span class="n">b</span>
+</span><span class="line">	<span class="n">x0</span><span class="p">,</span> <span class="n">x1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
+</span><span class="line">	<span class="k">if</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="mi">1</span>
+</span><span class="line">	<span class="k">while</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+</span><span class="line">		<span class="n">q</span> <span class="o">=</span> <span class="n">a</span> <span class="o">/</span> <span class="n">b</span>
+</span><span class="line">		<span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="o">%</span><span class="n">b</span>
+</span><span class="line">		<span class="n">x0</span><span class="p">,</span> <span class="n">x1</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">-</span> <span class="n">q</span> <span class="o">*</span> <span class="n">x0</span><span class="p">,</span> <span class="n">x0</span>
+</span><span class="line">	<span class="k">if</span> <span class="n">x1</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span> <span class="n">x1</span> <span class="o">+=</span> <span class="n">b0</span>
+</span><span class="line">	<span class="k">return</span> <span class="n">x1</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">chinese_remainder</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">lena</span><span class="p">):</span>
+</span><span class="line">	<span class="n">p</span> <span class="o">=</span> <span class="n">i</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">sm</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class="line">	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lena</span><span class="p">):</span> <span class="n">prod</span> <span class="o">*=</span> <span class="n">n</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span><span class="line">	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lena</span><span class="p">):</span>
+</span><span class="line">		<span class="n">p</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">/</span> <span class="n">n</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span><span class="line">		<span class="n">sm</span> <span class="o">+=</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">mul_inv</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">p</span>
+</span><span class="line">	<span class="k">return</span> <span class="n">sm</span> <span class="o">%</span> <span class="n">prod</span>
+</span><span class="line">
+</span><span class="line"><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+</span><span class="line">	<span class="n">n</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">29</span><span class="p">,</span> <span class="mi">191</span><span class="p">,</span> <span class="mi">397</span><span class="p">,</span> <span class="mi">691</span><span class="p">,</span> <span class="mi">1009</span><span class="p">,</span> <span class="mi">2039</span><span class="p">,</span> <span class="mi">4099</span><span class="p">,</span> <span class="mi">7001</span><span class="p">,</span> <span class="mi">10009</span><span class="p">,</span> <span class="mi">19997</span><span class="p">,</span> <span class="mi">30013</span><span class="p">,</span> <span class="mi">70009</span><span class="p">,</span> <span class="mi">160009</span><span class="p">,</span> <span class="mi">200009</span><span class="p">]</span>
+</span><span class="line">	<span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">130</span><span class="p">,</span> <span class="mi">343</span><span class="p">,</span> <span class="mi">652</span><span class="p">,</span> <span class="mi">858</span><span class="p">,</span> <span class="mi">689</span><span class="p">,</span> <span class="mi">1184</span><span class="p">,</span> <span class="mi">2027</span><span class="p">,</span> <span class="mi">5119</span><span class="p">,</span> <span class="mi">15165</span><span class="p">,</span> <span class="mi">15340</span><span class="p">,</span> <span class="mi">29303</span><span class="p">,</span> <span class="mi">42873</span><span class="p">,</span> <span class="mi">158045</span><span class="p">]</span>
+</span><span class="line">	<span class="n">c</span> <span class="o">=</span> <span class="n">chinese_remainder</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+</span><span class="line">	<span class="k">print</span> <span class="n">c</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Once we find the number that satisfies the first part of the problem, the second function comes in play</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="k">if</span> <span class="n">powmod</span><span class="p">(</span><span class="n">num</span><span class="p">,</span><span class="n">num2</span><span class="p">,</span><span class="mi">200009</span><span class="o">*</span><span class="mi">160009</span><span class="p">,</span><span class="s">&quot;</span><span class="si">%d</span><span class="s"> ^ </span><span class="si">%d</span><span class="s"> </span><span class="si">%%</span><span class="s"> </span><span class="si">%d</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">num</span><span class="p">,</span><span class="n">num2</span><span class="p">,</span><span class="mi">200009</span><span class="o">*</span><span class="mi">160009</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+</span><span class="line">  <span class="k">print</span>
+</span><span class="line">  <span class="k">print</span> <span class="s">&quot;</span><span class="si">%d</span><span class="s"> ^ </span><span class="si">%d</span><span class="s"> </span><span class="si">%%</span><span class="s"> </span><span class="si">%d</span><span class="s"> != 1... WRONG&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">num</span><span class="p">,</span><span class="n">num2</span><span class="p">,</span><span class="mi">200009</span><span class="o">*</span><span class="mi">160009</span><span class="p">)</span>
+</span><span class="line">  <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span class="line"><span class="k">else</span><span class="p">:</span>
+</span><span class="line">  <span class="k">print</span> <span class="s">&quot;Congratulations! The flag is: </span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="nb">str</span><span class="p">(</span><span class="n">num2</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>and what happens here is that the last two modulus operand of the secretz list, are multiplied one another and used as a modulus to compute the following equation</p>
+
+<script type="math/tex; mode=display">
+\begin{align}
+x^y \equiv 1 \pmod{N}
+\end{align}
+</script>
+
+<p>where </p>
+
+<ul>
+  <li>x is our first argument</li>
+  <li>y is our second argument</li>
+  <li>and N is the number obtained by the multiplication said above</li>
+</ul>
+
+<p>Solving this second part is easy, because there is the <em>Euler’s theorem</em> stating</p>
+
+<script type="math/tex; mode=display">
+\begin{align}
+a^{\phi(N)} \equiv 1 \pmod{N}
+\end{align}
+</script>
+
+<p>so.. Walfram Alfa to the rescue!</p>
+
+<p>let’s calculate <script type="math/tex">\phi(N)</script> as this will give us the correct value to submit to the program as second parameter.</p>
+
+<p>Unfortunately the clock script was buggy, and during the last step returned an exception, but in the end the calculated numbers were correct, and scored the flag successfully on the web site.</p>
+
+<pre><code>83359654581036155008716649031639683153293510843035531_32002880064
+</code></pre>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Swappage</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2014-11-08T21:49:30+01:00'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>9:49 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ctf/'>ctf</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://swappage.github.io/blog/2014/11/08/picoctf-2014-tick-tock/" data-via="" data-counturl="http://swappage.github.io/blog/2014/11/08/picoctf-2014-tick-tock/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/11/08/picoctf-2014-steves-list/" title="Previous Post: picoCTF 2014: Steve's List">&laquo; picoCTF 2014: Steve&#8217;s List</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/11/08/picoctf-2014-guess/" title="Next Post: picoCTF 2014: Guess">picoCTF 2014: Guess &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/11/08/picoctf-2014-guess/">picoCTF 2014: Guess</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/08/picoctf-2014-tick-tock/">picoCTF 2014: Tick Tock</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/08/picoctf-2014-steves-list/">picoCTF 2014: Steve&#8217;s List</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/08/picoctf-2014-rsa-mistakes/">picoCTF 2014: RSA Mistakes</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/23/asis-ctf-finals-2014-important-day/">ASIS-CTF Finals 2014: Important Day</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Swappage -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'swappage';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://swappage.github.io/blog/2014/11/08/picoctf-2014-tick-tock/';
+        var disqus_url = 'http://swappage.github.io/blog/2014/11/08/picoctf-2014-tick-tock/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+</body>
+</html>

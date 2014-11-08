@@ -3,6 +3,38 @@
   
   
   <url>
+    <loc>http://swappage.github.io/blog/2014/11/08/picoctf-2014-guess/</loc>
+    
+    <lastmod>2014-11-08T23:00:26+01:00</lastmod>
+    
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://swappage.github.io/blog/2014/11/08/picoctf-2014-tick-tock/</loc>
+    
+    <lastmod>2014-11-08T21:49:30+01:00</lastmod>
+    
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://swappage.github.io/blog/2014/11/08/picoctf-2014-steves-list/</loc>
+    
+    <lastmod>2014-11-08T21:05:49+01:00</lastmod>
+    
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://swappage.github.io/blog/2014/11/08/picoctf-2014-rsa-mistakes/</loc>
+    
+    <lastmod>2014-11-08T20:56:51+01:00</lastmod>
+    
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
     <loc>http://swappage.github.io/blog/2014/10/23/asis-ctf-finals-2014-important-day/</loc>
     
     <lastmod>2014-10-23T20:32:08+02:00</lastmod>
@@ -53,21 +85,21 @@
   
   <url>
     <loc>http://swappage.github.io/blog/archives/</loc>
-    <lastmod>2014-10-23T20:44:06+02:00</lastmod>
+    <lastmod>2014-11-08T02:35:09+01:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
     <loc>http://swappage.github.io/</loc>
-    <lastmod>2014-10-23T20:44:06+02:00</lastmod>
+    <lastmod>2014-11-08T02:35:09+01:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
   <url>
     <loc>http://swappage.github.io/about/</loc>
-    <lastmod>2014-10-23T20:44:06+02:00</lastmod>
+    <lastmod>2014-11-08T02:35:09+01:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
