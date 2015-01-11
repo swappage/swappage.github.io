@@ -1,0 +1,318 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>HackIM CTF 2015: Web400 Nullcon Pass Shop - The Swappage Playground</title>
+  <meta name="author" content="Swappage">
+
+  
+  <meta name="description" content="In this 400 points problem we were asked to buy a Nullcon pass for free. by opening the web page we were presented with the following scenario and by &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://swappage.github.io/blog/2015/01/11/hackim-ctf-2015-web400-nullcon-pass-shop">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="The Swappage Playground" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">The Swappage Playground</a></h1>
+  
+    <h2>Because in the end, what does matter is having fun.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:swappage.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">HackIM CTF 2015: Web400 Nullcon Pass Shop</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-01-11T22:17:15+01:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>11</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>10:17 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>In this 400 points problem we were asked to buy a Nullcon pass for free.</p>
+
+<p>by opening the web page we were presented with the following scenario</p>
+
+<p><img class="center" src="/images/2015-01-11_web400/webpage.png" /></p>
+
+<!-- more -->
+
+<p>and by clicking the buy button the following form was submitted</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="html"><span class="line">     <span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">checkout.php</span> <span class="na">method=</span><span class="s">POST</span><span class="nt">&gt;</span>
+</span><span class="line">     <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">hidden</span> <span class="na">name=</span><span class="s">msg</span> <span class="na">value=</span><span class="s">&quot;Nullcon2015%7Ccorporate%7C10999&quot;</span><span class="nt">&gt;&lt;br&gt;</span>
+</span><span class="line">     <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">hidden</span> <span class="na">name=</span><span class="s">checksum</span> <span class="na">value=</span><span class="s">&quot;568fe78b29ac377a58ae1fbf02b4d1a158e605b3897916227e4b3ecfc78973db&quot;</span><span class="nt">&gt;&lt;br&gt;</span>
+</span><span class="line">
+</span><span class="line">	<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">submit</span> <span class="na">value=</span><span class="s">Buy</span><span class="nt">&gt;</span>
+</span><span class="line"> <span class="nt">&lt;/form&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>to buy a a pass for free we had to tamper the msg parameter to have the price = 0, but we can’t directly modify the value because its integrity is checked against the checksum value.</p>
+
+<p>If we look at the source code of the page we see the following comment:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="html"><span class="line">   <span class="c">&lt;!-- </span>
+</span><span class="line"><span class="c">        </span>
+</span><span class="line"><span class="c">        </span>
+</span><span class="line"><span class="c">    if( $checksum === hash(&quot;sha256&quot;,$secretkey . $msg))   // secretkey is XXXXXXXXXXXXXXXXXXX    :-P</span>
+</span><span class="line"><span class="c">    {</span>
+</span><span class="line"><span class="c">      // Success; :)</span>
+</span><span class="line"><span class="c">    }</span>
+</span><span class="line"><span class="c">   </span>
+</span><span class="line"><span class="c">  ?&gt; </span>
+</span><span class="line"><span class="c">   --&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>and this reminded me to a really similar problem i solved for picoCTF.</p>
+
+<p>This was definitely a length extension attack against the checksum value, which can be performed because we are provided with the length of the secret key, which is 19 characters.</p>
+
+<p>using hashpump it was possible to create the appropriate tampered token and the corresponding checksum</p>
+
+<pre><code>token: Nullcon2015|corporate|10999%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%01p|0
+checksum: a2319d6945201a4b9fd67f077248faff2b735297cca2ac10762af65b2c2dca48
+</code></pre>
+
+<p>submitting them to the web server resulted in the flag being correctly retrieved:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</pre></td><td class="code"><pre><code class="html"><span class="line">HTTP/1.1 200 OK
+</span><span class="line">Date: Fri, 09 Jan 2015 21:08:38 GMT
+</span><span class="line">Server: Apache/2.4.7 (Ubuntu)
+</span><span class="line">X-Powered-By: PHP/5.5.9-1ubuntu4.5
+</span><span class="line">Vary: Accept-Encoding
+</span><span class="line">Content-Length: 114
+</span><span class="line">Keep-Alive: timeout=5, max=100
+</span><span class="line">Connection: Keep-Alive
+</span><span class="line">Content-Type: text/html
+</span><span class="line">
+</span><span class="line"><span class="nt">&lt;h1&gt;</span> Checkout <span class="nt">&lt;/h1&gt;</span>Congratualtion You bought Nullcon Pass in ZERO rupee. See you at Nullcon!Flag is fl@g_*2o15}
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Swappage</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-01-11T22:17:15+01:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>11</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>10:17 pm</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://swappage.github.io/blog/2015/01/11/hackim-ctf-2015-web400-nullcon-pass-shop/" data-via="" data-counturl="http://swappage.github.io/blog/2015/01/11/hackim-ctf-2015-web400-nullcon-pass-shop/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/01/11/hackim-ctf-2015-forensics-1/" title="Previous Post: HackIM CTF 2015: Forensics 1">&laquo; HackIM CTF 2015: Forensics 1</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/hackim-ctf-2015-web400-nullcon-pass-shop/">HackIM CTF 2015: Web400 Nullcon Pass Shop</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/hackim-ctf-2015-forensics-1/">HackIM CTF 2015: Forensics 1</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/24/advent-2014-day-21-otp/">Advent 2014 Day 21 : Otp</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/08/picoctf-2014-guess/">picoCTF 2014: Guess</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/08/picoctf-2014-tick-tock/">picoCTF 2014: Tick Tock</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Swappage -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'swappage';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://swappage.github.io/blog/2015/01/11/hackim-ctf-2015-web400-nullcon-pass-shop/';
+        var disqus_url = 'http://swappage.github.io/blog/2015/01/11/hackim-ctf-2015-web400-nullcon-pass-shop/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+</body>
+</html>

@@ -3,6 +3,14 @@
   
   
   <url>
+    <loc>http://swappage.github.io/blog/2015/01/11/hackim-ctf-2015-web400-nullcon-pass-shop/</loc>
+    
+    <lastmod>2015-01-11T22:17:15+01:00</lastmod>
+    
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
     <loc>http://swappage.github.io/blog/2015/01/11/hackim-ctf-2015-forensics-1/</loc>
     
     <lastmod>2015-01-11T21:12:33+01:00</lastmod>
@@ -101,21 +109,21 @@
   
   <url>
     <loc>http://swappage.github.io/blog/archives/</loc>
-    <lastmod>2015-01-11T21:42:19+01:00</lastmod>
+    <lastmod>2015-01-11T22:27:11+01:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
     <loc>http://swappage.github.io/</loc>
-    <lastmod>2015-01-11T21:42:19+01:00</lastmod>
+    <lastmod>2015-01-11T22:27:11+01:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
   <url>
     <loc>http://swappage.github.io/about/</loc>
-    <lastmod>2015-01-11T21:42:19+01:00</lastmod>
+    <lastmod>2015-01-11T22:27:11+01:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
