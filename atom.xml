@@ -4,7 +4,7 @@
   <title><![CDATA[The Swappage Playground]]></title>
   <link href="http://swappage.github.io/atom.xml" rel="self"/>
   <link href="http://swappage.github.io/"/>
-  <updated>2014-12-24T18:35:30+01:00</updated>
+  <updated>2015-01-11T21:42:19+01:00</updated>
   <id>http://swappage.github.io/</id>
   <author>
     <name><![CDATA[Swappage]]></name>
@@ -12,6 +12,92 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[HackIM CTF 2015: Forensics 1]]></title>
+    <link href="http://swappage.github.io/blog/2015/01/11/hackim-ctf-2015-forensics-1/"/>
+    <updated>2015-01-11T21:12:33+01:00</updated>
+    <id>http://swappage.github.io/blog/2015/01/11/hackim-ctf-2015-forensics-1</id>
+    <content type="html"><![CDATA[<p>This is the first and supposely easier forensics problem in the NullCon CTF 2015</p>
+
+<p><img class="center" src="http://swappage.github.io/images/2015-01-11_for100/problem.png" /></p>
+
+<p>we were provided with a pcap file, and were asked to identify the hideout of a wanted suspect.</p>
+
+<!-- more -->
+
+<p>I started looking at the pcap file in wireshark, and noticed that there were a bunch of HTTP sessions, at this point i decided to load the pcap file in xplico to make my life easier and to reconstruct the web pages.</p>
+
+<p><img class="center" src="http://swappage.github.io/images/2015-01-11_for100/urls.png" /></p>
+
+<p>By opening the url</p>
+
+<pre><code>http://10.20.31.84/locationlogs/
+</code></pre>
+
+<p>we can notice that it’s an http server directory listing and that there are a bunch of files in there.</p>
+
+<p><img class="center" src="http://swappage.github.io/images/2015-01-11_for100/locationlogs_index.png" /></p>
+
+<p>I proceded to save the files on disk and noticed that they were a mix of KML and KMZ files that i could import in google earth.</p>
+
+<p>Many of them were simply a disguise, we were asked to look for a cave, and obviously there was a file <em>dams_forests_caves</em> to attract our attention.</p>
+
+<p>I spent a couple of time trying to figure out which files were there just to increase the <em>noise</em> and which one was the really interesting one.</p>
+
+<p>Since the problem statement said something about monitoring the movements of the suspect, eventually the <em>trace log</em> caught my attention.</p>
+
+<p>It’s definitely a KML file, but it’s intentionally broken as it’s missing the XML headers needed for the KML specification.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</pre></td><td class="code"><pre><code class="xml"><span class="line"><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+</span><span class="line">  <span class="nt">&lt;Document&gt;</span>
+</span><span class="line">    <span class="nt">&lt;name&gt;</span>Timetimetime<span class="nt">&lt;/name&gt;</span>
+</span><span class="line">    <span class="nt">&lt;Style</span> <span class="na">id=</span><span class="s">&quot;paddle-a&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">      <span class="nt">&lt;IconStyle&gt;</span>
+</span><span class="line">        <span class="nt">&lt;Icon&gt;</span>
+</span><span class="line">          <span class="nt">&lt;href&gt;</span>http://maps.google.com/mapfiles/kml/paddle/A.png<span class="nt">&lt;/href&gt;</span>
+</span><span class="line">        <span class="nt">&lt;/Icon&gt;</span>
+</span><span class="line">        <span class="nt">&lt;hotSpot</span> <span class="na">x=</span><span class="s">&quot;32&quot;</span> <span class="na">y=</span><span class="s">&quot;1&quot;</span> <span class="na">xunits=</span><span class="s">&quot;pixels&quot;</span> <span class="na">yunits=</span><span class="s">&quot;pixels&quot;</span> <span class="nt">/&gt;</span>
+</span><span class="line">      <span class="nt">&lt;/IconStyle&gt;</span>
+</span><span class="line">    <span class="nt">&lt;/Style&gt;</span>
+</span><span class="line">...
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>I quickly fixed it and tried to import it in google Earth for further inspection.</p>
+
+<p>I’ve added the appropriate headers to the file:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="xml"><span class="line"><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+</span><span class="line"><span class="nt">&lt;kml</span> <span class="na">xmlns=</span><span class="s">&quot;http://www.opengis.net/kml/2.2&quot;</span> <span class="na">xmlns:gx=</span><span class="s">&quot;http://www.google.com/kml/ext/2.2&quot;</span> <span class="na">xmlns:kml=</span><span class="s">&quot;http://www.opengis.net/kml/2.2&quot;</span> <span class="na">xmlns:atom=</span><span class="s">&quot;http://www.w3.org/2005/Atom&quot;</span><span class="nt">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>and what i got as result is the following:</p>
+
+<p><img class="center" src="http://swappage.github.io/images/2015-01-11_for100/tracelog.png" /></p>
+
+<p>That placeholder i’ve marked in red seemed really suspicious, and in fact, if you look at the picture that google earth shows nearby we can see</p>
+
+<p><img class="center" src="http://swappage.github.io/images/2015-01-11_for100/cave.png" /></p>
+
+<p>the flag is</p>
+
+<pre><code>flag{md5("pirates cave")}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Advent 2014 Day 21 : Otp]]></title>
