@@ -1,0 +1,819 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>GITS 2015: CloudFS - The Swappage Playground</title>
+  <meta name="author" content="Swappage">
+
+  
+  <meta name="description" content="This CTF was what I’d call an humbling experience; it was an absolutely great
+contest, don’t get me wrong, but damn! it was hard!, and since I’m not &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://swappage.github.io/blog/2015/01/20/gits-2015-cloudfs">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="The Swappage Playground" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">The Swappage Playground</a></h1>
+  
+    <h2>Because in the end, what does matter is having fun.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:swappage.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">GITS 2015: CloudFS</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-01-20T16:35:21+01:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>4:35 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>This CTF was what I’d call <em>an humbling experience</em>; it was an absolutely great
+contest, don’t get me wrong, but damn! it was hard!, and since I’m not a CTF
+veteran, let me say that I learned an important thing: “There is no limit
+to the evilness people can put in their effort of creating challanging puzzles”.</p>
+
+<!-- more -->
+
+<p>Ok but let’s get back to this specific challenge.
+For 200 points we were asked to extract an hidden key from a pcap file.</p>
+
+<p>The name of the challenge was an hint itself: <em>cloudfs</em> made me think about
+something that was used to transfer a file, and by opening a pcap all i could see
+were some HTTP traffic packets to wikipedia, and loots and loots of ICMP ping
+requests/responses.</p>
+
+<p><img class="center" src="/images/2015-01-20_cloudfs/pings.png" /></p>
+
+<p>Before diving into the pcap itself i ran through some usual checks you do to spot
+obvious things, and after having verified that nothing was appended at the bottom of
+the pcap file, and that it wasn’t a <em>polyglot</em> i started looking closer at the packets
+themselves.</p>
+
+<p>Fresh from the <a href="http://blog.vulnhub.com/2014/09/competition-persistence.html">Persistence competition</a>
+I figured out pretty quickly that the icmp packets could have been used as a cover channel
+to hide something, and in fact if we look at the payload data from a couple of random
+icmp requests we could easly notice that the ping pattern was containing custom data.</p>
+
+<p><img class="center" src="/images/2015-01-20_cloudfs/apples.png" /></p>
+
+<p>The interesting things start at packet 1040 in the pcap file, where we can see
+the header for a bzip2 file</p>
+
+<p><img class="center" src="/images/2015-01-20_cloudfs/bz2.png" /></p>
+
+<p>which was repeating onwards every 4 packets till the end of the pcap file.</p>
+
+<p>I’ve then tried to extract the data payload of the four interesting packets and use
+binwalk to see if it could extract something useful.</p>
+
+<pre><code># binwalk -e filtered.pcap
+
+DECIMAL   	HEX       	DESCRIPTION
+-------------------------------------------------------------------------------------------------------------------
+20        	0x14      	bzip2 compressed data, block size = 900k
+</code></pre>
+
+<p>It was actually detecting and extracting a bzip2 file, the header was there, after
+all, but if i tried extracting its content it was informing me that the file was
+corrupted.</p>
+
+<pre><code># bunzip2 14.bz2
+
+bunzip2: Data integrity error when decompressing.
+Input file = 14.bz2, output file = 14
+
+It is possible that the compressed file(s) have become corrupted.
+You can use the -tvv option to test integrity of such files.
+
+You can use the `bzip2recover' program to attempt to recover
+data from undamaged sections of corrupted files.
+
+bunzip2: Deleting output file 14, if it exists.
+</code></pre>
+
+<p>It took me a little while to notice that the pings were sent in an incorrect
+order, and that it was necessary to reorder them properly.</p>
+
+<p>In fact, let’s look at the icmp packet identifier.</p>
+
+<p><img class="center" src="/images/2015-01-20_cloudfs/identifier.png" /></p>
+
+<p>Here it’s possible to notice that the identifier are ordered as 13 14 16 15</p>
+
+<p>I’ve tried to extract the packets payload data separately (after all they were
+  only 4 packets) and reassemble them by hand.</p>
+
+<pre><code># cat 13.raw 14.raw 15.raw 16.raw &gt; reassembled.raw
+# binwalk reassembled.raw -e
+
+DECIMAL   	HEX       	DESCRIPTION
+-------------------------------------------------------------------------------------------------------------------
+20        	0x14      	bzip2 compressed data, block size = 900k
+
+# ls -la
+total 64
+drwxr-xr-x 2 root root  4096 Jan 20 20:00 .
+drwxr-xr-x 7 root root 36864 Jan 20 20:00 ..
+-rw-r--r-- 1 root root 24556 Jan 20 20:00 14
+
+# file 14
+14: POSIX tar archive (GNU)
+
+# mv 14 14.tar; tar xvf 14.tar
+key
+ping/ping.py
+</code></pre>
+
+<p>and appearently we got the tar archive containing both the key, as well as the
+python script that was used to create the cover channel</p>
+
+<pre><code># cat key
+key{WhyWouldYouEverUseThis}
+</code></pre>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+<span class="line-number">45</span>
+<span class="line-number">46</span>
+<span class="line-number">47</span>
+<span class="line-number">48</span>
+<span class="line-number">49</span>
+<span class="line-number">50</span>
+<span class="line-number">51</span>
+<span class="line-number">52</span>
+<span class="line-number">53</span>
+<span class="line-number">54</span>
+<span class="line-number">55</span>
+<span class="line-number">56</span>
+<span class="line-number">57</span>
+<span class="line-number">58</span>
+<span class="line-number">59</span>
+<span class="line-number">60</span>
+<span class="line-number">61</span>
+<span class="line-number">62</span>
+<span class="line-number">63</span>
+<span class="line-number">64</span>
+<span class="line-number">65</span>
+<span class="line-number">66</span>
+<span class="line-number">67</span>
+<span class="line-number">68</span>
+<span class="line-number">69</span>
+<span class="line-number">70</span>
+<span class="line-number">71</span>
+<span class="line-number">72</span>
+<span class="line-number">73</span>
+<span class="line-number">74</span>
+<span class="line-number">75</span>
+<span class="line-number">76</span>
+<span class="line-number">77</span>
+<span class="line-number">78</span>
+<span class="line-number">79</span>
+<span class="line-number">80</span>
+<span class="line-number">81</span>
+<span class="line-number">82</span>
+<span class="line-number">83</span>
+<span class="line-number">84</span>
+<span class="line-number">85</span>
+<span class="line-number">86</span>
+<span class="line-number">87</span>
+<span class="line-number">88</span>
+<span class="line-number">89</span>
+<span class="line-number">90</span>
+<span class="line-number">91</span>
+<span class="line-number">92</span>
+<span class="line-number">93</span>
+<span class="line-number">94</span>
+<span class="line-number">95</span>
+<span class="line-number">96</span>
+<span class="line-number">97</span>
+<span class="line-number">98</span>
+<span class="line-number">99</span>
+<span class="line-number">100</span>
+<span class="line-number">101</span>
+<span class="line-number">102</span>
+<span class="line-number">103</span>
+<span class="line-number">104</span>
+<span class="line-number">105</span>
+<span class="line-number">106</span>
+<span class="line-number">107</span>
+<span class="line-number">108</span>
+<span class="line-number">109</span>
+<span class="line-number">110</span>
+<span class="line-number">111</span>
+<span class="line-number">112</span>
+<span class="line-number">113</span>
+<span class="line-number">114</span>
+<span class="line-number">115</span>
+<span class="line-number">116</span>
+<span class="line-number">117</span>
+<span class="line-number">118</span>
+<span class="line-number">119</span>
+<span class="line-number">120</span>
+<span class="line-number">121</span>
+<span class="line-number">122</span>
+<span class="line-number">123</span>
+<span class="line-number">124</span>
+<span class="line-number">125</span>
+<span class="line-number">126</span>
+<span class="line-number">127</span>
+<span class="line-number">128</span>
+<span class="line-number">129</span>
+<span class="line-number">130</span>
+<span class="line-number">131</span>
+<span class="line-number">132</span>
+<span class="line-number">133</span>
+<span class="line-number">134</span>
+<span class="line-number">135</span>
+<span class="line-number">136</span>
+<span class="line-number">137</span>
+<span class="line-number">138</span>
+<span class="line-number">139</span>
+<span class="line-number">140</span>
+<span class="line-number">141</span>
+<span class="line-number">142</span>
+<span class="line-number">143</span>
+<span class="line-number">144</span>
+<span class="line-number">145</span>
+<span class="line-number">146</span>
+<span class="line-number">147</span>
+<span class="line-number">148</span>
+<span class="line-number">149</span>
+<span class="line-number">150</span>
+<span class="line-number">151</span>
+<span class="line-number">152</span>
+<span class="line-number">153</span>
+<span class="line-number">154</span>
+<span class="line-number">155</span>
+<span class="line-number">156</span>
+<span class="line-number">157</span>
+<span class="line-number">158</span>
+<span class="line-number">159</span>
+<span class="line-number">160</span>
+<span class="line-number">161</span>
+<span class="line-number">162</span>
+<span class="line-number">163</span>
+<span class="line-number">164</span>
+<span class="line-number">165</span>
+<span class="line-number">166</span>
+<span class="line-number">167</span>
+<span class="line-number">168</span>
+<span class="line-number">169</span>
+<span class="line-number">170</span>
+<span class="line-number">171</span>
+<span class="line-number">172</span>
+<span class="line-number">173</span>
+<span class="line-number">174</span>
+<span class="line-number">175</span>
+<span class="line-number">176</span>
+<span class="line-number">177</span>
+<span class="line-number">178</span>
+<span class="line-number">179</span>
+<span class="line-number">180</span>
+<span class="line-number">181</span>
+<span class="line-number">182</span>
+<span class="line-number">183</span>
+<span class="line-number">184</span>
+<span class="line-number">185</span>
+<span class="line-number">186</span>
+<span class="line-number">187</span>
+<span class="line-number">188</span>
+<span class="line-number">189</span>
+<span class="line-number">190</span>
+<span class="line-number">191</span>
+<span class="line-number">192</span>
+<span class="line-number">193</span>
+<span class="line-number">194</span>
+<span class="line-number">195</span>
+<span class="line-number">196</span>
+<span class="line-number">197</span>
+<span class="line-number">198</span>
+<span class="line-number">199</span>
+<span class="line-number">200</span>
+<span class="line-number">201</span>
+<span class="line-number">202</span>
+<span class="line-number">203</span>
+<span class="line-number">204</span>
+<span class="line-number">205</span>
+<span class="line-number">206</span>
+<span class="line-number">207</span>
+<span class="line-number">208</span>
+<span class="line-number">209</span>
+<span class="line-number">210</span>
+<span class="line-number">211</span>
+<span class="line-number">212</span>
+<span class="line-number">213</span>
+<span class="line-number">214</span>
+<span class="line-number">215</span>
+<span class="line-number">216</span>
+<span class="line-number">217</span>
+<span class="line-number">218</span>
+<span class="line-number">219</span>
+<span class="line-number">220</span>
+<span class="line-number">221</span>
+<span class="line-number">222</span>
+<span class="line-number">223</span>
+<span class="line-number">224</span>
+<span class="line-number">225</span>
+<span class="line-number">226</span>
+<span class="line-number">227</span>
+<span class="line-number">228</span>
+<span class="line-number">229</span>
+<span class="line-number">230</span>
+<span class="line-number">231</span>
+<span class="line-number">232</span>
+<span class="line-number">233</span>
+<span class="line-number">234</span>
+<span class="line-number">235</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span><span class="nn">sys</span><span class="o">,</span><span class="nn">socket</span><span class="o">,</span><span class="nn">struct</span><span class="o">,</span><span class="nn">select</span><span class="o">,</span><span class="nn">time</span><span class="o">,</span><span class="nn">binascii</span><span class="o">,</span><span class="nn">logging</span>
+</span><span class="line"><span class="kn">import</span> <span class="nn">ping_reporter</span>
+</span><span class="line">
+</span><span class="line"><span class="n">ping_count</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class="line"><span class="n">ping_bandwidth</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class="line"><span class="n">log</span> <span class="o">=</span> <span class="n">ping_reporter</span><span class="o">.</span><span class="n">setup_log</span><span class="p">(</span><span class="s">&#39;Ping&#39;</span><span class="p">)</span>
+</span><span class="line"><span class="n">server_list</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;www.wikipedia.org&#39;</span><span class="p">]</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">select_server</span><span class="p">(</span><span class="n">log</span><span class="p">,</span><span class="n">max_timeout</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+</span><span class="line"><span class="n">server</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+</span><span class="line"><span class="n">log</span><span class="o">.</span><span class="n">notice</span><span class="p">(</span><span class="s">&#39;selecting server&#39;</span><span class="p">)</span>
+</span><span class="line"><span class="n">maxw</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">server_list</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">))</span>
+</span><span class="line"><span class="n">min_delay</span> <span class="o">=</span> <span class="n">max_timeout</span> <span class="o">*</span> <span class="mi">1000</span> <span class="c"># seconds -&gt; ms</span>
+</span><span class="line"><span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">server_list</span><span class="p">:</span>
+</span><span class="line"><span class="n">delay</span> <span class="o">=</span> <span class="n">min_delay</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span class="line"><span class="k">try</span><span class="p">:</span> <span class="n">delay</span> <span class="o">=</span> <span class="n">single_ping</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">max_timeout</span><span class="p">)</span>
+</span><span class="line"><span class="k">finally</span><span class="p">:</span>
+</span><span class="line"><span class="k">if</span> <span class="n">delay</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">notice</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%-*s</span><span class="s">: timed out&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">maxw</span><span class="p">,</span><span class="n">x</span><span class="p">))</span>
+</span><span class="line"><span class="k">else</span><span class="p">:</span>             <span class="n">log</span><span class="o">.</span><span class="n">notice</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%-*s</span><span class="s">: </span><span class="si">%05.02f</span><span class="s">ms&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">maxw</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">delay</span><span class="o">*</span><span class="mi">1000</span><span class="p">))</span>
+</span><span class="line"><span class="k">if</span> <span class="n">delay</span> <span class="o">!=</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">delay</span> <span class="o">&lt;</span> <span class="n">min_delay</span><span class="p">:</span>
+</span><span class="line"><span class="n">min_delay</span> <span class="o">=</span> <span class="n">delay</span>
+</span><span class="line"><span class="n">server</span> <span class="o">=</span> <span class="n">x</span>
+</span><span class="line"><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;selected server: </span><span class="si">%s</span><span class="s"> (</span><span class="si">%.02f</span><span class="s">ms)&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="n">min_delay</span><span class="o">*</span><span class="mi">1000</span><span class="p">))</span>
+</span><span class="line"><span class="k">return</span> <span class="n">server</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">carry_add</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+</span><span class="line"><span class="n">c</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+</span><span class="line"><span class="k">return</span> <span class="p">(</span><span class="n">c</span> <span class="o">&amp;</span> <span class="mh">0xFFFF</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">c</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">checksum</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+</span><span class="line"><span class="n">s</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class="line"><span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span><span class="o">%</span><span class="mi">2</span><span class="p">:</span> <span class="c"># pad with NULL</span>
+</span><span class="line"><span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span> <span class="o">+</span> <span class="s">&#39;</span><span class="si">%c</span><span class="s">&#39;</span><span class="o">%</span><span class="mi">0</span>
+</span><span class="line"><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+</span><span class="line"><span class="n">w</span> <span class="o">=</span> <span class="nb">ord</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span>
+</span><span class="line"><span class="n">s</span> <span class="o">=</span> <span class="n">carry_add</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+</span><span class="line"><span class="k">return</span> <span class="o">~</span><span class="n">s</span> <span class="o">&amp;</span> <span class="mh">0xFFFF</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">build_ping</span><span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+</span><span class="line"><span class="n">log</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s">&#39;ping::build_ping: ID=</span><span class="si">%d</span><span class="s">, bytes=</span><span class="si">%d</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">ID</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>
+</span><span class="line"><span class="k">if</span> <span class="n">ID</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Invalid BlockID (0): many servers will corrupt ID=0 ICMP messages&#39;</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="n">data</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="c"># string type, like the packed result</span>
+</span><span class="line">
+</span><span class="line"><span class="c"># Header is type (8), code (8), checksum (16), id (16), sequence (16)</span>
+</span><span class="line"><span class="n">icmp_type</span>      <span class="o">=</span> <span class="mi">8</span> <span class="c"># ICMP_ECHO_REQUEST</span>
+</span><span class="line"><span class="n">icmp_code</span>      <span class="o">=</span> <span class="mi">0</span> <span class="c"># Can be anything, but reply MUST be 0</span>
+</span><span class="line"><span class="n">icmp_checksum</span>  <span class="o">=</span> <span class="mi">0</span> <span class="c"># 0 for initial checksum calculation</span>
+</span><span class="line"><span class="c">#	icmp_id        = (ID &gt;&gt; 16) &amp; 0xFFFF</span>
+</span><span class="line"><span class="c">#	icmp_sequence  = (ID &lt;&lt;  0) &amp; 0xFFFF</span>
+</span><span class="line"><span class="n">block_id</span>       <span class="o">=</span> <span class="n">ID</span> <span class="c"># append id &amp; seq for 4-byte identifier</span>
+</span><span class="line">
+</span><span class="line"><span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s">&quot;bbHI&quot;</span><span class="p">,</span> <span class="n">icmp_type</span><span class="p">,</span> <span class="n">icmp_code</span><span class="p">,</span> <span class="n">icmp_checksum</span><span class="p">,</span> <span class="n">block_id</span><span class="p">)</span>
+</span><span class="line"><span class="n">icmp_checksum</span> <span class="o">=</span> <span class="n">checksum</span><span class="p">(</span><span class="n">header</span><span class="o">+</span><span class="n">data</span><span class="p">)</span>
+</span><span class="line"><span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s">&quot;bbHI&quot;</span><span class="p">,</span> <span class="n">icmp_type</span><span class="p">,</span> <span class="n">icmp_code</span><span class="p">,</span> <span class="n">icmp_checksum</span><span class="p">,</span> <span class="n">block_id</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="c"># Return built ICMP message</span>
+</span><span class="line"><span class="k">return</span> <span class="n">header</span><span class="o">+</span><span class="n">data</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">build_socket</span><span class="p">(</span><span class="n">RCVBUF</span><span class="o">=</span><span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="p">):</span>
+</span><span class="line"><span class="c"># By default, SO_RCVBUF is ~50k (kernel doubles to 114688), which only supports</span>
+</span><span class="line"><span class="c"># ~1k blocks with &lt;1ms timing. Raising this to 1m supports &gt;16k blocks. Unfortunately,</span>
+</span><span class="line"><span class="c"># raising it more does little because we can&#39;t read/process the events fast enough, so</span>
+</span><span class="line"><span class="c"># the buffer pretty quickly fills, and then start dropping packets again.</span>
+</span><span class="line"><span class="n">log</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s">&#39;ping::build_socket&#39;</span><span class="p">)</span>
+</span><span class="line"><span class="n">icmp</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">getprotobyname</span><span class="p">(</span><span class="s">&quot;icmp&quot;</span><span class="p">)</span>
+</span><span class="line"><span class="k">try</span><span class="p">:</span>
+</span><span class="line"><span class="n">icmp_socket</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_RAW</span><span class="p">,</span> <span class="n">icmp</span><span class="p">)</span>
+</span><span class="line"><span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="p">(</span><span class="n">errno</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+</span><span class="line"><span class="k">if</span> <span class="n">errno</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c"># Operation not permitted</span>
+</span><span class="line"><span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span> <span class="o">+</span> <span class="p">(</span><span class="s">&quot; (ICMP messages can only be sent from processes running as root)&quot;</span><span class="p">)</span>
+</span><span class="line"><span class="k">raise</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</span><span class="line"><span class="k">raise</span> <span class="c"># raise the original error</span>
+</span><span class="line"><span class="n">socket</span><span class="o">.</span><span class="n">SO_SNDBUFFORCE</span> <span class="o">=</span> <span class="mi">32</span>
+</span><span class="line"><span class="n">socket</span><span class="o">.</span><span class="n">SO_RCVBUFFORCE</span> <span class="o">=</span> <span class="mi">33</span>
+</span><span class="line"><span class="n">icmp_socket</span><span class="o">.</span><span class="n">setsockopt</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">SOL_SOCKET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SO_RCVBUFFORCE</span><span class="p">,</span> <span class="n">RCVBUF</span><span class="p">)</span>
+</span><span class="line"><span class="n">icmp_socket</span><span class="o">.</span><span class="n">setsockopt</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">SOL_SOCKET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SO_SNDBUFFORCE</span><span class="p">,</span> <span class="n">RCVBUF</span><span class="p">)</span>
+</span><span class="line"><span class="k">return</span> <span class="n">icmp_socket</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">time_ping</span><span class="p">(</span><span class="n">d_socket</span><span class="p">,</span> <span class="n">d_addr</span><span class="p">,</span> <span class="n">ID</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+</span><span class="line"><span class="n">log</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s">&#39;ping::time_ping: server=</span><span class="si">%s</span><span class="s"> ID=</span><span class="si">%d</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">d_addr</span><span class="p">,</span><span class="n">ID</span><span class="p">))</span>
+</span><span class="line"><span class="n">data</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s">&quot;d&quot;</span><span class="p">,</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+</span><span class="line"><span class="k">return</span> <span class="n">data_ping</span><span class="p">(</span><span class="n">d_socket</span><span class="p">,</span> <span class="n">d_addr</span><span class="p">,</span> <span class="n">ID</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">data_ping</span><span class="p">(</span><span class="n">d_socket</span><span class="p">,</span> <span class="n">d_addr</span><span class="p">,</span> <span class="n">ID</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+</span><span class="line"><span class="n">log</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s">&#39;ping::data_ping: server=</span><span class="si">%s</span><span class="s"> ID=</span><span class="si">%d</span><span class="s"> bytes=</span><span class="si">%d</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">d_addr</span><span class="p">,</span><span class="n">ID</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>
+</span><span class="line"><span class="n">send_ping</span><span class="p">(</span><span class="n">d_socket</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostbyname</span><span class="p">(</span><span class="n">d_addr</span><span class="p">),</span> <span class="n">ID</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">send_ping</span><span class="p">(</span><span class="n">d_socket</span><span class="p">,</span> <span class="n">d_addr</span><span class="p">,</span> <span class="n">ID</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+</span><span class="line"><span class="n">log</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s">&#39;ping::send_ping: server=</span><span class="si">%s</span><span class="s"> ID=</span><span class="si">%d</span><span class="s"> bytes=</span><span class="si">%d</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">d_addr</span><span class="p">,</span><span class="n">ID</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>
+</span><span class="line"><span class="k">global</span> <span class="n">ping_count</span><span class="p">,</span> <span class="n">ping_bandwidth</span>
+</span><span class="line"><span class="n">packet</span> <span class="o">=</span> <span class="n">build_ping</span><span class="p">(</span><span class="n">ID</span><span class="p">,</span><span class="n">data</span><span class="p">)</span>
+</span><span class="line"><span class="n">d_socket</span><span class="o">.</span><span class="n">sendto</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="p">(</span><span class="n">d_addr</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</span><span class="line"><span class="k">if</span> <span class="mi">1</span><span class="p">:</span>
+</span><span class="line"><span class="n">ping_count</span> <span class="o">=</span> <span class="n">ping_count</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span class="line"><span class="n">ping_bandwidth</span> <span class="o">=</span> <span class="n">ping_bandwidth</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">parse_ip</span><span class="p">(</span><span class="n">packet</span><span class="p">):</span>
+</span><span class="line"><span class="n">log</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s">&#39;ping::parse_ip: bytes=</span><span class="si">%d</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">)))</span>
+</span><span class="line"><span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">:</span> <span class="k">return</span> <span class="bp">None</span>
+</span><span class="line"><span class="p">(</span><span class="n">verlen</span><span class="p">,</span><span class="n">ID</span><span class="p">,</span><span class="n">flags</span><span class="p">,</span><span class="n">frag</span><span class="p">,</span><span class="n">ttl</span><span class="p">,</span><span class="n">protocol</span><span class="p">,</span><span class="n">csum</span><span class="p">,</span><span class="n">src</span><span class="p">,</span><span class="n">dst</span><span class="p">)</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s">&#39;!B3xH4BHII&#39;</span><span class="p">,</span><span class="n">packet</span><span class="p">[:</span><span class="mi">20</span><span class="p">])</span>
+</span><span class="line"><span class="n">ip</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>  <span class="n">version</span><span class="o">=</span> <span class="n">verlen</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">,</span>
+</span><span class="line">  <span class="n">length</span><span class="o">=</span>  <span class="mi">4</span><span class="o">*</span><span class="p">(</span><span class="n">verlen</span> <span class="o">&amp;</span> <span class="mh">0xF</span><span class="p">),</span>
+</span><span class="line">  <span class="n">ID</span><span class="o">=</span>      <span class="n">ID</span><span class="p">,</span>
+</span><span class="line">  <span class="n">flags</span><span class="o">=</span>   <span class="n">flags</span> <span class="o">&gt;&gt;</span> <span class="mi">5</span><span class="p">,</span>
+</span><span class="line">  <span class="n">fragment</span><span class="o">=</span><span class="p">((</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="mh">0x1F</span><span class="p">)</span><span class="o">+</span><span class="n">frag</span><span class="p">),</span>
+</span><span class="line">  <span class="n">ttl</span><span class="o">=</span>     <span class="n">ttl</span><span class="p">,</span>
+</span><span class="line">  <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>
+</span><span class="line">  <span class="n">checksum</span><span class="o">=</span><span class="n">csum</span><span class="p">,</span>
+</span><span class="line">  <span class="n">src</span><span class="o">=</span>     <span class="n">src</span><span class="p">,</span>
+</span><span class="line">  <span class="n">dst</span><span class="o">=</span>     <span class="n">dst</span><span class="p">)</span>
+</span><span class="line">  <span class="k">return</span> <span class="n">ip</span>
+</span><span class="line">
+</span><span class="line">  <span class="k">def</span> <span class="nf">parse_icmp</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span><span class="n">validate</span><span class="p">):</span>
+</span><span class="line">  <span class="n">log</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s">&#39;ping::parse_icmp: bytes=</span><span class="si">%d</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">)))</span>
+</span><span class="line">  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">:</span> <span class="k">return</span> <span class="bp">None</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">csum</span><span class="p">,</span> <span class="n">block_id</span><span class="p">)</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s">&#39;bbHI&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">[:</span><span class="mi">8</span><span class="p">])</span>
+</span><span class="line">  <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;ping::parse_icmp: type=</span><span class="si">%d</span><span class="s"> code=</span><span class="si">%d</span><span class="s"> csum=</span><span class="si">%x</span><span class="s"> ID=</span><span class="si">%d</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span><span class="n">code</span><span class="p">,</span><span class="n">csum</span><span class="p">,</span><span class="n">block_id</span><span class="p">))</span>
+</span><span class="line">  <span class="n">icmp</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+</span><span class="line">    <span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
+</span><span class="line">    <span class="n">checksum</span><span class="o">=</span><span class="n">csum</span><span class="p">,</span> <span class="c"># calculated big-endian</span>
+</span><span class="line">    <span class="n">block_id</span><span class="o">=</span><span class="n">block_id</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">if</span> <span class="n">validate</span><span class="p">:</span>
+</span><span class="line">    <span class="n">t_header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s">&#39;bbHI&#39;</span><span class="p">,</span><span class="nb">type</span><span class="p">,</span><span class="n">code</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">block_id</span><span class="p">)</span>
+</span><span class="line">    <span class="n">t_csum</span> <span class="o">=</span> <span class="n">checksum</span><span class="p">(</span><span class="n">t_header</span><span class="o">+</span><span class="n">packet</span><span class="p">[</span><span class="mi">8</span><span class="p">:])</span>
+</span><span class="line">    <span class="n">icmp</span><span class="p">[</span><span class="s">&#39;valid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">t_csum</span> <span class="o">==</span> <span class="n">csum</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">return</span> <span class="n">icmp</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">def</span> <span class="nf">parse_ping</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span><span class="n">validate</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+</span><span class="line">    <span class="n">log</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s">&#39;ping::parse_ping: bytes=</span><span class="si">%d</span><span class="s"> validate=</span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span><span class="n">validate</span><span class="p">))</span>
+</span><span class="line">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="o">+</span><span class="mi">8</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="bp">None</span> <span class="c"># require 1 block of data</span>
+</span><span class="line">    <span class="n">ip</span> <span class="o">=</span> <span class="n">parse_ip</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+</span><span class="line">    <span class="k">if</span> <span class="ow">not</span> <span class="n">ip</span><span class="p">:</span>                                <span class="k">return</span> <span class="bp">None</span>
+</span><span class="line">    <span class="k">if</span> <span class="n">ip</span><span class="p">[</span><span class="s">&#39;protocol&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">socket</span><span class="o">.</span><span class="n">IPPROTO_ICMP</span><span class="p">:</span> <span class="k">return</span> <span class="bp">None</span> <span class="c"># ICMP</span>
+</span><span class="line">    <span class="k">if</span> <span class="n">ip</span><span class="p">[</span><span class="s">&#39;version&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">socket</span><span class="o">.</span><span class="n">IPPROTO_IPIP</span><span class="p">:</span>  <span class="k">return</span> <span class="bp">None</span> <span class="c"># IPv4</span>
+</span><span class="line">    <span class="k">if</span> <span class="n">ip</span><span class="p">[</span><span class="s">&#39;length&#39;</span><span class="p">]</span><span class="o">+</span><span class="mi">8</span><span class="o">+</span><span class="mi">1</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">):</span>        <span class="k">return</span> <span class="bp">None</span> <span class="c"># invalid ICMP header</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">packet</span> <span class="o">=</span> <span class="n">packet</span><span class="p">[</span><span class="n">ip</span><span class="p">[</span><span class="s">&#39;length&#39;</span><span class="p">]:]</span>
+</span><span class="line">    <span class="n">icmp</span> <span class="o">=</span> <span class="n">parse_icmp</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span><span class="n">validate</span><span class="p">)</span>
+</span><span class="line">    <span class="k">if</span> <span class="ow">not</span> <span class="n">icmp</span><span class="p">:</span>                              <span class="k">return</span> <span class="bp">None</span>
+</span><span class="line">    <span class="k">if</span> <span class="n">icmp</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>                     <span class="k">return</span> <span class="bp">None</span> <span class="c"># not an Echo Reply packet</span>
+</span><span class="line">    <span class="k">if</span> <span class="n">icmp</span><span class="p">[</span><span class="s">&#39;code&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>                     <span class="k">return</span> <span class="bp">None</span> <span class="c"># not a valid Echo Reply packet</span>
+</span><span class="line">    <span class="k">if</span> <span class="n">validate</span> <span class="ow">and</span> <span class="n">icmp</span><span class="p">[</span><span class="s">&#39;valid&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">True</span><span class="p">:</span>    <span class="k">return</span> <span class="bp">None</span> <span class="c"># invalid ICMP checksum</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">payload</span> <span class="o">=</span> <span class="n">packet</span><span class="p">[</span><span class="mi">8</span><span class="p">:]</span>
+</span><span class="line">    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;ping::parse_ping: valid echo reply w/ ID=</span><span class="si">%d</span><span class="s"> (</span><span class="si">%d</span><span class="s"> bytes)&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">icmp</span><span class="p">[</span><span class="s">&#39;block_id&#39;</span><span class="p">],</span><span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)))</span>
+</span><span class="line">    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span><span class="n">icmp</span><span class="o">=</span><span class="n">icmp</span><span class="p">,</span><span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">    <span class="k">def</span> <span class="nf">recv_ping</span><span class="p">(</span><span class="n">d_socket</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+</span><span class="line">    <span class="n">d_socket</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+</span><span class="line">    <span class="k">try</span><span class="p">:</span>
+</span><span class="line">    <span class="n">data</span><span class="p">,</span><span class="n">addr</span> <span class="o">=</span> <span class="n">d_socket</span><span class="o">.</span><span class="n">recvfrom</span><span class="p">(</span><span class="mi">2048</span><span class="p">)</span>
+</span><span class="line">    <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">timeout</span><span class="p">:</span>
+</span><span class="line">    <span class="k">return</span> <span class="bp">None</span>
+</span><span class="line">    <span class="n">parsed</span> <span class="o">=</span> <span class="n">parse_ping</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">validate</span><span class="p">)</span>
+</span><span class="line">    <span class="k">if</span> <span class="ow">not</span> <span class="n">parsed</span><span class="p">:</span> <span class="k">return</span> <span class="bp">None</span>
+</span><span class="line">    <span class="n">parsed</span><span class="p">[</span><span class="s">&#39;ID&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">parsed</span><span class="p">[</span><span class="s">&#39;icmp&#39;</span><span class="p">][</span><span class="s">&#39;block_id&#39;</span><span class="p">]</span>
+</span><span class="line">    <span class="n">parsed</span><span class="p">[</span><span class="s">&#39;address&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">addr</span>
+</span><span class="line">    <span class="n">parsed</span><span class="p">[</span><span class="s">&#39;raw&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">data</span>
+</span><span class="line">    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;ping::recv_ping: ID=</span><span class="si">%d</span><span class="s"> address=</span><span class="si">%s</span><span class="s"> bytes=</span><span class="si">%d</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">parsed</span><span class="p">[</span><span class="s">&#39;ID&#39;</span><span class="p">],</span><span class="n">addr</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>
+</span><span class="line">    <span class="k">return</span> <span class="n">parsed</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">def</span> <span class="nf">read_ping</span><span class="p">(</span><span class="n">d_socket</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
+</span><span class="line">    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span><span class="line">    <span class="k">while</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="n">timeout</span><span class="p">:</span>
+</span><span class="line">    <span class="n">msg</span> <span class="o">=</span> <span class="n">recv_ping</span><span class="p">(</span><span class="n">d_socket</span><span class="p">,</span><span class="n">timeout</span><span class="p">)</span>
+</span><span class="line">    <span class="k">if</span> <span class="n">msg</span><span class="p">:</span> <span class="k">return</span> <span class="n">msg</span>
+</span><span class="line">    <span class="k">return</span> <span class="bp">None</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">def</span> <span class="nf">receive_ping</span><span class="p">(</span><span class="n">my_socket</span><span class="p">,</span> <span class="n">ID</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
+</span><span class="line">    <span class="n">timeLeft</span> <span class="o">=</span> <span class="n">timeout</span>
+</span><span class="line">    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+</span><span class="line">    <span class="n">startedSelect</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span><span class="line">    <span class="n">whatReady</span> <span class="o">=</span> <span class="n">select</span><span class="o">.</span><span class="n">select</span><span class="p">([</span><span class="n">my_socket</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="n">timeLeft</span><span class="p">)</span>
+</span><span class="line">    <span class="k">if</span> <span class="n">whatReady</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="p">[]:</span> <span class="c"># Timeout</span>
+</span><span class="line">    <span class="k">return</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">timeReceived</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span><span class="line">    <span class="n">howLongInSelect</span> <span class="o">=</span> <span class="p">(</span><span class="n">timeReceived</span> <span class="o">-</span> <span class="n">startedSelect</span><span class="p">)</span>
+</span><span class="line">    <span class="n">recPacket</span><span class="p">,</span> <span class="n">addr</span> <span class="o">=</span> <span class="n">my_socket</span><span class="o">.</span><span class="n">recvfrom</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span>
+</span><span class="line">    <span class="n">icmpHeader</span> <span class="o">=</span> <span class="n">recPacket</span><span class="p">[</span><span class="mi">20</span><span class="p">:</span><span class="mi">28</span><span class="p">]</span>
+</span><span class="line">    <span class="nb">type</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">checksum</span><span class="p">,</span> <span class="n">packetID</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s">&quot;bbHI&quot;</span><span class="p">,</span> <span class="n">icmpHeader</span><span class="p">)</span>
+</span><span class="line">    <span class="k">if</span> <span class="n">packetID</span> <span class="o">==</span> <span class="n">ID</span><span class="p">:</span>
+</span><span class="line">    <span class="n">bytesInDouble</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s">&quot;d&quot;</span><span class="p">)</span>
+</span><span class="line">    <span class="n">timeSent</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s">&quot;d&quot;</span><span class="p">,</span> <span class="n">recPacket</span><span class="p">[</span><span class="mi">28</span><span class="p">:</span><span class="mi">28</span> <span class="o">+</span> <span class="n">bytesInDouble</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+</span><span class="line">    <span class="k">return</span> <span class="n">timeReceived</span> <span class="o">-</span> <span class="n">timeSent</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">timeLeft</span> <span class="o">=</span> <span class="n">timeLeft</span> <span class="o">-</span> <span class="n">howLongInSelect</span>
+</span><span class="line">    <span class="k">if</span> <span class="n">timeLeft</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+</span><span class="line">    <span class="k">return</span> <span class="mi">0</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">def</span> <span class="nf">single_ping</span><span class="p">(</span><span class="n">dest_addr</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
+</span><span class="line">    <span class="n">my_socket</span> <span class="o">=</span> <span class="n">build_socket</span><span class="p">()</span>
+</span><span class="line">    <span class="n">my_ID</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span> <span class="o">&amp;</span> <span class="mh">0xFFFF</span>
+</span><span class="line">    <span class="n">time_ping</span><span class="p">(</span><span class="n">my_socket</span><span class="p">,</span> <span class="n">dest_addr</span><span class="p">,</span> <span class="n">my_ID</span><span class="p">)</span>
+</span><span class="line">    <span class="n">delay</span> <span class="o">=</span> <span class="n">receive_ping</span><span class="p">(</span><span class="n">my_socket</span><span class="p">,</span> <span class="n">my_ID</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
+</span><span class="line">    <span class="n">my_socket</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span><span class="line">    <span class="k">return</span> <span class="n">delay</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">def</span> <span class="nf">verbose_ping</span><span class="p">(</span><span class="n">dest_addr</span><span class="p">,</span> <span class="n">timeout</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">4</span><span class="p">):</span>
+</span><span class="line">    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">count</span><span class="p">):</span>
+</span><span class="line">    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;ping </span><span class="si">%s</span><span class="s">...&quot;</span> <span class="o">%</span> <span class="n">dest_addr</span><span class="p">,)</span>
+</span><span class="line">    <span class="k">try</span><span class="p">:</span>
+</span><span class="line">    <span class="n">delay</span>  <span class="o">=</span>  <span class="n">single_ping</span><span class="p">(</span><span class="n">dest_addr</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
+</span><span class="line">    <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">gaierror</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+</span><span class="line">    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;failed. (socket error: &#39;</span><span class="si">%s</span><span class="s">&#39;)&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</span><span class="line">    <span class="k">break</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">if</span> <span class="n">delay</span>  <span class="o">==</span>  <span class="bp">None</span><span class="p">:</span>
+</span><span class="line">    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;failed. (timeout within </span><span class="si">%s</span><span class="s">sec.)&quot;</span> <span class="o">%</span> <span class="n">timeout</span><span class="p">)</span>
+</span><span class="line">    <span class="k">else</span><span class="p">:</span>
+</span><span class="line">    <span class="n">delay</span>  <span class="o">=</span>  <span class="n">delay</span> <span class="o">*</span> <span class="mi">1000</span>
+</span><span class="line">    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;get ping in </span><span class="si">%0.4f</span><span class="s">ms&quot;</span> <span class="o">%</span> <span class="n">delay</span><span class="p">)</span>
+</span><span class="line">    <span class="k">print</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">    <span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">pwd</span><span class="o">,</span> <span class="nn">grp</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+</span><span class="line">    <span class="n">ping_reporter</span><span class="o">.</span><span class="n">start_log</span><span class="p">(</span><span class="n">log</span><span class="p">)</span>
+</span><span class="line">    <span class="n">server</span> <span class="o">=</span> <span class="n">select_server</span><span class="p">(</span><span class="n">log</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">if</span> <span class="mi">1</span><span class="p">:</span>
+</span><span class="line">    <span class="n">verbose_ping</span><span class="p">(</span><span class="n">server</span><span class="p">)</span>
+</span><span class="line">    <span class="k">else</span><span class="p">:</span>
+</span><span class="line">    <span class="n">s</span> <span class="o">=</span> <span class="n">build_socket</span><span class="p">()</span>
+</span><span class="line">    <span class="k">print</span> <span class="s">&#39;sending 100 pings...&#39;</span>
+</span><span class="line">    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">100</span><span class="p">):</span>
+</span><span class="line">    <span class="n">data_ping</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">server</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s">&#39;d&#39;</span><span class="p">,</span><span class="n">x</span><span class="p">))</span>
+</span><span class="line">    <span class="k">print</span> <span class="s">&#39;ping cycled...&#39;</span>
+</span><span class="line">    <span class="n">recv_ping</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+</span><span class="line">    <span class="k">print</span> <span class="s">&#39;100 pings sent&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>And this one was one of the simpliest challenges in this contest… so well…
+congratulations to all the teams that solved a lot of them :)</p>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Swappage</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-01-20T16:35:21+01:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>4:35 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ctf/'>ctf</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://swappage.github.io/blog/2015/01/20/gits-2015-cloudfs/" data-via="" data-counturl="http://swappage.github.io/blog/2015/01/20/gits-2015-cloudfs/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/01/11/hackim-ctf-2015-web400-nullcon-pass-shop/" title="Previous Post: HackIM CTF 2015: Web400 Nullcon pass shop">&laquo; HackIM CTF 2015: Web400 Nullcon pass shop</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/20/gits-2015-cloudfs/">GITS 2015: CloudFS</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/hackim-ctf-2015-web400-nullcon-pass-shop/">HackIM CTF 2015: Web400 Nullcon Pass Shop</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/hackim-ctf-2015-forensics-1/">HackIM CTF 2015: Forensics 1</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/24/advent-2014-day-21-otp/">Advent 2014 Day 21 : Otp</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/08/picoctf-2014-guess/">picoCTF 2014: Guess</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Swappage -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'swappage';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://swappage.github.io/blog/2015/01/20/gits-2015-cloudfs/';
+        var disqus_url = 'http://swappage.github.io/blog/2015/01/20/gits-2015-cloudfs/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+</body>
+</html>
