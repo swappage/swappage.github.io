@@ -4,7 +4,7 @@
   <title><![CDATA[The Swappage Playground]]></title>
   <link href="http://swappage.github.io/atom.xml" rel="self"/>
   <link href="http://swappage.github.io/"/>
-  <updated>2015-07-12T21:58:43+02:00</updated>
+  <updated>2015-07-12T22:21:57+02:00</updated>
   <id>http://swappage.github.io/</id>
   <author>
     <name><![CDATA[Swappage]]></name>
@@ -55,7 +55,7 @@ From a first look the last part of the URL looked like an hash (a sha256), but m
   <li>bit flipping.</li>
 </ul>
 
-<p>I spent quite a while attempting a badding oracle attack, but without any success, so i decided to try a bit flipping one.</p>
+<p>I spent quite a while attempting a padding oracle attack, but without any success, so i decided to try a bit flipping one.</p>
 
 <p><img class="center" src="http://swappage.github.io/images/2015-07-12_john-the-referee/goodresult.png" /></p>
 
