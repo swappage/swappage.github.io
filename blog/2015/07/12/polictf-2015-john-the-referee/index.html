@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Hello World - The Swappage Playground</title>
+  <title>PoliCTF 2015: John the Referee - The Swappage Playground</title>
   <meta name="author" content="Swappage">
 
   
-  <meta name="description" content="Hello there! It looks like i made up my mind and started a blog!. *lier* Ok ok, you are right… the truth is that i started playing around with &hellip;">
+  <meta name="description" content="Wow, it’s been a long time since my last writeup, during this weekend me and my friends at the vulnhub-ctf team took part in the PoliCTF and here is &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://swappage.github.io/blog/2014/09/23/hello-world">
+  <link rel="canonical" href="http://swappage.github.io/blog/2015/07/12/polictf-2015-john-the-referee">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="The Swappage Playground" type="application/atom+xml">
@@ -69,7 +69,7 @@
   
   <header>
     
-      <h1 class="entry-title">Hello World</h1>
+      <h1 class="entry-title">PoliCTF 2015: John the Referee</h1>
     
     
       <p class="meta">
@@ -78,30 +78,74 @@
 
 
 
-<time class='entry-date' datetime='2014-09-23T21:20:47+02:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2014</span></span> <span class='time'>9:20 pm</span></time>
+<time class='entry-date' datetime='2015-07-12T21:49:52+02:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>9:49 pm</span></time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>Hello there!</p>
+<div class="entry-content"><p>Wow, it’s been a long time since my last writeup, during this weekend me and my friends at the vulnhub-ctf team took part in the PoliCTF and here is my writeup about this nice web challenge, make sure to read all our writeups at our <a href="http://ctf-team.vulnhub.com/">VulnHub-CTF Team Blog</a></p>
 
-<p>It looks like i made up my mind and started a blog!.</p>
+<p>John the referee was a 150 points web challenge with some crypto added to the recipe :)</p>
 
-<p><em>*lier*</em></p>
+<p>The web application looked like a shop selling different types of tshirts and our objective was to discover an hidden item in the shop.</p>
 
-<p>Ok ok, you are right… the truth is that i started playing around with Markdown and octopress, and i wanted to try publishing something :)</p>
+<!-- more -->
 
-<p>What’s going to be published here?</p>
+<p><img class="center" src="/images/2015-07-12_john-the-referee/index.png" /></p>
 
-<p>Well, pretty much everything that comes in my mind, things that i found interesting, reserches that I might be working on, games i play..</p>
+<p>The search function looked interesting, because once a search string was submitted, the user was redirected to a search result page having an URL similar to the following:</p>
 
-<p>Oh right, I recently got an addiction for hacking games and competitions, so you will probably see some walkthroughs of challenges and problems from various CTF games..</p>
+<pre><code>http://referee.polictf.it/search-result/e25fc408c9ac78c3fb02ff08ece71f1b4182747916789ca739281400a7a33cca
+</code></pre>
 
-<p>mhh yep, pretty much it for now.
-See you soon :)</p>
+<p>Obviously trying to perform a basic SQL injection attack revealed that the input from the search form was sanitized.</p>
 
+<p><img class="center" src="/images/2015-07-12_john-the-referee/sanitized.png" /></p>
+
+<p>But let’s get back to the search result page.
+From a first look the last part of the URL looked like an hash (a sha256), but messing around with the search form, and submitting longer search keywords, we could notice that the hexdecimal string was expanding by 32 characters (16 bytes) every 16 characters in the search string.</p>
+
+<p>This suggested that instead of an hash, it was most likely a block cipher encoded text, and chances that it was containing our search string were quite high.</p>
+
+<p>Also by searching the same string multiple time, the encrypted string in the URL was different every time, and this meant that an initialization vector was used.</p>
+
+<p>Putting all the things togeder, from what we knew the URL hex encoded string was most likely an AES256 CBC encrypted version of our search keyword.</p>
+
+<p>This meant that if we could manipulate the content of the encrypted text directly from the URL, we could probably bypass the sanitization and perform a SQL injection on the backend database.</p>
+
+<p>There are two types of attacks that are especially effective against block ciphers encrypted data:</p>
+
+<ul>
+  <li>padding oracle</li>
+  <li>bit flipping.</li>
+</ul>
+
+<p>I spent quite a while attempting a badding oracle attack, but without any success, so i decided to try a bit flipping one.</p>
+
+<p><img class="center" src="/images/2015-07-12_john-the-referee/goodresult.png" /></p>
+
+<p>A good search result page looked like the one from the above picture, this suggested that probably a union select injection would be effective</p>
+
+<p>The only sanitized characters were \ ‘ “ and a few others, so i decided to submit the following search string from the search page</p>
+
+<pre><code>&amp; union select 1,2,3,4 ;#--
+</code></pre>
+
+<p>and start messing with the search result ciphertext</p>
+
+<p><img class="center" src="/images/2015-07-12_john-the-referee/union_inject.png" /></p>
+
+<p>Soon enaugh we had a working injection :)</p>
+
+<p>From there on, i continued with some standard enumeration techniques to determine the database and the table name; fairly long and tedious part, i really wanted to prevent the usage of banned characters in the query, and therefore i couldn’t use any <em>where</em> clause.</p>
+
+<p>Still at the end i figured out that the database name was johnthereferee and the table name was uniforms.</p>
+
+<p>at that point running the following query returned the flag.</p>
+
+<p><img class="center" src="/images/2015-07-12_john-the-referee/flag.png" /></p>
 </div>
 
 
@@ -117,7 +161,7 @@ See you soon :)</p>
 
 
 
-<time class='entry-date' datetime='2014-09-23T21:20:47+02:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2014</span></span> <span class='time'>9:20 pm</span></time>
+<time class='entry-date' datetime='2015-07-12T21:49:52+02:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>9:49 pm</span></time>
       
 
 
@@ -125,7 +169,7 @@ See you soon :)</p>
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://swappage.github.io/blog/2014/09/23/hello-world/" data-via="" data-counturl="http://swappage.github.io/blog/2014/09/23/hello-world/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://swappage.github.io/blog/2015/07/12/polictf-2015-john-the-referee/" data-via="" data-counturl="http://swappage.github.io/blog/2015/07/12/polictf-2015-john-the-referee/" >Tweet</a>
   
   
   
@@ -134,8 +178,8 @@ See you soon :)</p>
     
     <p class="meta">
       
+        <a class="basic-alignment left" href="/blog/2015/01/20/gits-2015-cloudfs/" title="Previous Post: GITS 2015: CloudFS">&laquo; GITS 2015: CloudFS</a>
       
-        <a class="basic-alignment right" href="/blog/2014/09/24/csaw-2014-saturn-walkthrough/" title="Next Post: CSAW 2014: saturn walkthrough">CSAW 2014: saturn walkthrough &raquo;</a>
       
     </p>
   </footer>
@@ -201,8 +245,8 @@ See you soon :)</p>
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://swappage.github.io/blog/2014/09/23/hello-world/';
-        var disqus_url = 'http://swappage.github.io/blog/2014/09/23/hello-world/';
+        var disqus_identifier = 'http://swappage.github.io/blog/2015/07/12/polictf-2015-john-the-referee/';
+        var disqus_url = 'http://swappage.github.io/blog/2015/07/12/polictf-2015-john-the-referee/';
         var disqus_script = 'embed.js';
       
     (function () {

@@ -4,7 +4,7 @@
   <title><![CDATA[The Swappage Playground]]></title>
   <link href="http://swappage.github.io/atom.xml" rel="self"/>
   <link href="http://swappage.github.io/"/>
-  <updated>2015-01-20T17:53:45+01:00</updated>
+  <updated>2015-07-12T21:58:43+02:00</updated>
   <id>http://swappage.github.io/</id>
   <author>
     <name><![CDATA[Swappage]]></name>
@@ -12,6 +12,75 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[PoliCTF 2015: John the Referee]]></title>
+    <link href="http://swappage.github.io/blog/2015/07/12/polictf-2015-john-the-referee/"/>
+    <updated>2015-07-12T21:49:52+02:00</updated>
+    <id>http://swappage.github.io/blog/2015/07/12/polictf-2015-john-the-referee</id>
+    <content type="html"><![CDATA[<p>Wow, it’s been a long time since my last writeup, during this weekend me and my friends at the vulnhub-ctf team took part in the PoliCTF and here is my writeup about this nice web challenge, make sure to read all our writeups at our <a href="http://ctf-team.vulnhub.com/">VulnHub-CTF Team Blog</a></p>
+
+<p>John the referee was a 150 points web challenge with some crypto added to the recipe :)</p>
+
+<p>The web application looked like a shop selling different types of tshirts and our objective was to discover an hidden item in the shop.</p>
+
+<!-- more -->
+
+<p><img class="center" src="http://swappage.github.io/images/2015-07-12_john-the-referee/index.png" /></p>
+
+<p>The search function looked interesting, because once a search string was submitted, the user was redirected to a search result page having an URL similar to the following:</p>
+
+<pre><code>http://referee.polictf.it/search-result/e25fc408c9ac78c3fb02ff08ece71f1b4182747916789ca739281400a7a33cca
+</code></pre>
+
+<p>Obviously trying to perform a basic SQL injection attack revealed that the input from the search form was sanitized.</p>
+
+<p><img class="center" src="http://swappage.github.io/images/2015-07-12_john-the-referee/sanitized.png" /></p>
+
+<p>But let’s get back to the search result page.
+From a first look the last part of the URL looked like an hash (a sha256), but messing around with the search form, and submitting longer search keywords, we could notice that the hexdecimal string was expanding by 32 characters (16 bytes) every 16 characters in the search string.</p>
+
+<p>This suggested that instead of an hash, it was most likely a block cipher encoded text, and chances that it was containing our search string were quite high.</p>
+
+<p>Also by searching the same string multiple time, the encrypted string in the URL was different every time, and this meant that an initialization vector was used.</p>
+
+<p>Putting all the things togeder, from what we knew the URL hex encoded string was most likely an AES256 CBC encrypted version of our search keyword.</p>
+
+<p>This meant that if we could manipulate the content of the encrypted text directly from the URL, we could probably bypass the sanitization and perform a SQL injection on the backend database.</p>
+
+<p>There are two types of attacks that are especially effective against block ciphers encrypted data:</p>
+
+<ul>
+  <li>padding oracle</li>
+  <li>bit flipping.</li>
+</ul>
+
+<p>I spent quite a while attempting a badding oracle attack, but without any success, so i decided to try a bit flipping one.</p>
+
+<p><img class="center" src="http://swappage.github.io/images/2015-07-12_john-the-referee/goodresult.png" /></p>
+
+<p>A good search result page looked like the one from the above picture, this suggested that probably a union select injection would be effective</p>
+
+<p>The only sanitized characters were \ ‘ “ and a few others, so i decided to submit the following search string from the search page</p>
+
+<pre><code>&amp; union select 1,2,3,4 ;#--
+</code></pre>
+
+<p>and start messing with the search result ciphertext</p>
+
+<p><img class="center" src="http://swappage.github.io/images/2015-07-12_john-the-referee/union_inject.png" /></p>
+
+<p>Soon enaugh we had a working injection :)</p>
+
+<p>From there on, i continued with some standard enumeration techniques to determine the database and the table name; fairly long and tedious part, i really wanted to prevent the usage of banned characters in the query, and therefore i couldn’t use any <em>where</em> clause.</p>
+
+<p>Still at the end i figured out that the database name was johnthereferee and the table name was uniforms.</p>
+
+<p>at that point running the following query returned the flag.</p>
+
+<p><img class="center" src="http://swappage.github.io/images/2015-07-12_john-the-referee/flag.png" /></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[GITS 2015: CloudFS]]></title>
