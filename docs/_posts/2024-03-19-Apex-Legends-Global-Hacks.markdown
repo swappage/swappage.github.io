@@ -18,7 +18,7 @@ Premesso che, nel momento in cui sto scrivendo questo articolo, non vi sono stat
 
 Credo che il modo migliore per spiegare che cosa sia accaduto in quegli istanti, agli occhi degli spettatori, sia quello di mostrare una clip catturata dagli stream della partita in corso.
 
-<iframe src="https://clips.twitch.tv/embed?clip=ApatheticAcceptableWhaleCopyThis-p4_Azg9oYVXBJr5x&parent=127.0.0.1" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="620"></iframe>
+<iframe src="https://clips.twitch.tv/embed?clip=ApatheticAcceptableWhaleCopyThis-p4_Azg9oYVXBJr5x&parent=swappage.github.io" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="620"></iframe>
 
 Come si può vedere, mentre la partita era in corso, sullo schermo è comparso un *gump* di un software per *cheating*, e il giocatore ha iniziato a vedere a schermo tutti gli altri player, anche attraverso i muri o gli ostacoli.
 
@@ -26,7 +26,7 @@ La cosa che si potrebbe pensare a prima vista, è che, accidentalmente e in mani
 
 E tutto questo avrebbe senso se, allo stesso tempo, quasi in contemporanea, un altro famosissimo giocatore è risultato vittima del medesimo trattamento:
 
-<iframe src="https://clips.twitch.tv/embed?clip=VivaciousNaiveWolfFUNgineer-eIoLbgTeD42AIjMd&parent=127.0.0.1" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="620"></iframe>
+<iframe src="https://clips.twitch.tv/embed?clip=VivaciousNaiveWolfFUNgineer-eIoLbgTeD42AIjMd&parent=swappage.github.io" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="620"></iframe>
 
 Ma quindi cosa può essere effettivamente successo realmente? Se diamo per scontata l'onestà dei sopra citati player, che comunque sono risaputi godere di ottima fama, e di aver dimostrato le loro reali capacità anche in eventi dal vivo, quali possono essere gli scenari possibili?
 
