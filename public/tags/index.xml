@@ -3,18 +3,18 @@
     <channel>
         <title>Tags on Glitchy Gadgets &lt;br /&gt; &amp; Runner&#39;s Regrets
 </title>
-        <link>https://swappage.github.io/tags/</link>
+        <link>http://localhost:1313/tags/</link>
         <description>Recent content in Tags on Glitchy Gadgets &lt;br /&gt; &amp; Runner&#39;s Regrets
 </description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en</language>
         <copyright>Swappage</copyright>
-        <lastBuildDate>Tue, 19 Mar 2024 14:43:56 +0000</lastBuildDate><atom:link href="https://swappage.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Tue, 19 Mar 2024 14:43:56 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Apex Legends</title>
-        <link>https://swappage.github.io/tags/apex-legends/</link>
+        <link>http://localhost:1313/tags/apex-legends/</link>
         <pubDate>Tue, 19 Mar 2024 14:43:56 +0000</pubDate>
         
-        <guid>https://swappage.github.io/tags/apex-legends/</guid>
+        <guid>http://localhost:1313/tags/apex-legends/</guid>
         <description></description>
         </item>
         
