@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Posts on Glitchy Gadgets &amp; Runner&#39;s Regrets</title>
+        <link>http://localhost:1313/posts/</link>
+        <description>Recent content in Posts on Glitchy Gadgets &amp; Runner&#39;s Regrets</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>Swappage</copyright>
+        <lastBuildDate>Tue, 19 Mar 2024 14:43:56 +0000</lastBuildDate><atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>[Italian] Apex Legends Global Hacks</title>
+        <link>http://localhost:1313/posts/apex-legends-global-hacks/</link>
+        <pubDate>Tue, 19 Mar 2024 14:43:56 +0000</pubDate>
+        
+        <guid>http://localhost:1313/posts/apex-legends-global-hacks/</guid>
+        <description>il torneo Apex Legends Global Series (ALGS) è conosciuto nel settore del gaming professionistico come il torneo più prestigioso, direttamente organizzato e supportato da Electronic Arts, dell&amp;rsquo;omonimo gioco Apex Legends. Il torneo si struttura in una serie di giornate durante le quali, in ciascuna regione, le squadre più forti del mondo si danno battaglia per cercare di conquistare uno dei 20 posti disponibili all&amp;rsquo;evento conclusivo: una finale in LAN con un montepremi complessivo di 1.</description>
+        </item>
+        <item>
+        <title>First Post... Yay!</title>
+        <link>http://localhost:1313/posts/first-post/</link>
+        <pubDate>Tue, 19 Mar 2024 00:13:56 +0000</pubDate>
+        
+        <guid>http://localhost:1313/posts/first-post/</guid>
+        <description>Hello reader and welcome to this little corner of the interwebz where from time to time you might find some new content that I thought it was worth sharing with everyone willing to read.
+How this idea of starting a blog came to my mind in the first place? To be honest i still don&amp;rsquo;t really know, truth is that, at this very address, I used to have a small blog which back in the days served as a repository for CTF writeups.</description>
+        </item>
+        
+    </channel>
+</rss>

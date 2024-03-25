@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Categories on Glitchy Gadgets &lt;br /&gt; &amp; Runner&#39;s Regrets
+</title>
+        <link>https://swappage.github.io/categories/</link>
+        <description>Recent content in Categories on Glitchy Gadgets &lt;br /&gt; &amp; Runner&#39;s Regrets
+</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>Swappage</copyright>
+        <lastBuildDate>Tue, 19 Mar 2024 14:43:56 +0000</lastBuildDate><atom:link href="https://swappage.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Gaming</title>
+        <link>https://swappage.github.io/categories/gaming/</link>
+        <pubDate>Tue, 19 Mar 2024 14:43:56 +0000</pubDate>
+        
+        <guid>https://swappage.github.io/categories/gaming/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Hacking</title>
+        <link>https://swappage.github.io/categories/hacking/</link>
+        <pubDate>Tue, 19 Mar 2024 14:43:56 +0000</pubDate>
+        
+        <guid>https://swappage.github.io/categories/hacking/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Technology</title>
+        <link>https://swappage.github.io/categories/technology/</link>
+        <pubDate>Tue, 19 Mar 2024 14:43:56 +0000</pubDate>
+        
+        <guid>https://swappage.github.io/categories/technology/</guid>
+        <description></description>
+        </item>
+        
+    </channel>
+</rss>

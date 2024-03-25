@@ -1,0 +1,4 @@
+baseURL = 'https://example.org/'
+languageCode = 'en-us'
+title = "Glitchy Gadgets & Runner's Regrets"
+theme = 'hugo-theme-stack'
